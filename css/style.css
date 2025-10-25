@@ -1,0 +1,240 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+           
+        }
+        body {
+            background: url("../images/fon6.png");
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: rgb(255, 142, 225);
+            box-shadow: 2 2px 2px rgba(0,0,0,0.1);
+            padding: 15px;
+            border: 3px, dashed,rgb(150, 130, 189);
+        }
+
+        .logo {
+            font-family: Bradley Hand, cursive;
+            font-size: 45px;
+            font-weight: 900;
+            letter-spacing: 30px;
+            text-align: center;
+            color: white;
+             -webkit-text-stroke: 2px rgb(150, 130, 189);;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .filter-section {
+            flex: 1;
+            min-width: 250px;
+            background-color: #fff;
+            border-radius: 8px;
+            border: 4px, solid,  #f8aee8;
+            padding: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .filter-title {
+            font-family: Bradley Hand, cursive;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: rgb(150, 130, 189);
+            border-bottom: 2px solid #f8aee8;
+            padding-bottom: 8px;
+        }
+
+        .filter-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            color: rgb(225, 112, 195);
+        }
+
+        .filter-item:hover {
+            color:rgb(206, 73, 170);
+        }
+
+        .filter-item::before {
+            content: "•";
+            margin-right: 8px;
+            color: rgb(150, 130, 189);
+        }
+
+        .more-link {
+            color: white;
+            background-color: rgb(255, 142, 225);
+            border: 3px, dashed,rgb(150, 130, 189);
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            align-items: center;
+            border-radius: 50px;
+
+        }
+
+        .popular-section {
+            margin: 40px 0;
+        }
+
+        .section-title {
+            font-family: Bradley Hand, cursive;
+            font-weight: 600;
+            max-width: 250px;
+            background-color: #fff;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            align-items: center;
+            border-radius: 4px;
+            color: rgb(150, 130, 189);
+            border: 4px, solid,  #f8aee8;
+        }
+
+        .popular-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .popular-card {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+
+        .popular-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-content {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-family: Bradley Hand, cursive;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: rgb(150, 130, 189);
+        }
+
+        .card-description {
+            color: rgb(255, 142, 225);
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .subscription {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .subscription h3 {
+            margin-bottom: 24px;
+            font-family: Bradley Hand, cursive;
+            font-weight: bold;
+            color: rgb(150, 130, 189);
+        }
+
+        .email-input {
+            padding: 12px 15px;
+            width: 300px;
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .subscribe-btn {
+            font-family: Bradley Hand, cursive;
+            font-weight: bold;
+            background-color:  rgb(255, 142, 225);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        .subscribe-btn:hover {
+            background-color:rgb(206, 73, 170);
+        }
+
+        footer {
+            background-color: rgb(255, 142, 225);
+            color: #fff;
+            padding: 30px 0;
+            margin-top: 40px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .social-link {
+            color: #fff;
+            font-weight: bold;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .social-link:hover {
+            color:rgb(206, 73, 170);
+        }
+
+        .copyright {
+            text-align: center;
+            font-size: 14px;
+            color: #ffffff;
+        }
+
+        @media (max-width: 768px) {
+            .filters {
+                flex-direction: column;
+            }
+            
+            .email-input {
+                width: 100%;
+                margin-bottom: 10px;
+                margin-right: 0;
+            }
+            
+            .subscribe-btn {
+                width: 100%;
+            }
+        }

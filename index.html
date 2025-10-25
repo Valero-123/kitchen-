@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кулинарный сайт</title>
+    <link rel="stylesheet" href="css/style.css"> <!-- CSS-файл -->
+     <header>
+        <div class="container">
+            <div class="logo">KITCHEN</div>
+        </div>
+    </header>
+</head>
+<body>
+   
+
+    <div class="container">
+        <div class="filters">
+            <div class="filter-section">
+                <div class="filter-title">КУХНЯ</div>
+                <div class="filter-item">Русская</div>
+                <div class="filter-item">Итальянская</div>
+                <div class="filter-item">Французская</div>
+                <div class="more-link">+ ещё ...</div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-title">ПОЗИЦИЯ</div>
+                <div class="filter-item">Первое блюдо</div>
+                <div class="filter-item">Второе блюдо</div>
+                <div class="filter-item">Салат</div>
+                <div class="more-link">+ ещё ...</div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-title">ГОТОВКА</div>
+                <div class="filter-item">На сковороде</div>
+                <div class="filter-item">В духовке</div>
+                <div class="filter-item">В кастрюле</div>
+                <div class="more-link">+ ещё ...</div>
+            </div>
+
+            <div class="filter-section">
+                <div class="filter-title">ПРАЗДНИК</div>
+                <div class="filter-item">Новый год</div>
+                <div class="filter-item">Пасха</div>
+                <div class="filter-item">День рождения</div>
+                <div class="more-link">+ ещё ...</div>
+            </div>
+        </div>
+        <div class="popular-section">
+            <h2 class="section-title">ПОПУЛЯРНОЕ:</h2>
+            <div class="popular-grid">
+                <div class="popular-card">
+                    <div class="card-content">
+                        <h3 class="card-title">ЦЕЗАРЬ</h3>
+                        <p class="card-description">Цезарь — овощной салат, популярное блюдо американской кухни (иногда относят к мексиканской или итальянской кухне). Описание: Основные ингредиенты — пшеничные гренки. Листья салата роман и ...</p>
+                    </div>
+                </div>
+                <div class="popular-card">
+                    <div class="card-content">
+                        <h3 class="card-title">ЦЕЗАРЬ</h3>
+                        <p class="card-description">Цезарь — овощной салат, популярное блюдо американской кухни (иногда относят к мексиканской или итальянской кухне). Описание: Основные ингредиенты — пшеничные гренки. Листья салата роман и ...</p>
+                    </div>
+                </div>
+                <div class="popular-card">
+                    <div class="card-content">
+                        <h3 class="card-title">ЦЕЗАРЬ</h3>
+                        <p class="card-description">Цезарь — овощной салат, популярное блюдо американской кухни (иногда относят к мексиканской или итальянской кухне). Описание: Основные ингредиенты — пшеничные гренки. Листья салата роман и ...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="more-link" style="margin-top: 20px;">+ ещё ...</div>
+        </div>
+
+        <div class="subscription">
+            <h3>Подпишитесь на обновления</h3>
+            <form id="subscribe-form">
+                <input type="email" class="email-input" placeholder="Введите ваш email" required>
+                <button type="submit" class="subscribe-btn">ПОДПИСАТЬСЯ</button>
+            </form>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="social-links">
+                <a href="#" class="social-link">VK</a>
+                <a href="#" class="social-link">WhatsApp</a>
+                <a href="#" class="social-link">Telegram</a>
+            </div>
+            <div class="copyright">©2025 Кондратьев Валерий Захарович гр.4321-22</div>
+        </div>
+    </footer>
+
+    <script>
+        // Обработка формы подписки
+        document.getElementById('subscribe-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('.email-input').value;
+            alert(`Спасибо за подписку! На адрес ${email} будут приходить обновления.`);
+            this.reset();
+        });
+
+        // Обработка кликов по ссылкам "ещё"
+        document.querySelectorAll('.more-link').forEach(link => {
+            link.addEventListener('click', function() {
+                alert('Показать больше элементов');
+            });
+        });
+
+        // Обработка кликов по фильтрам
+        document.querySelectorAll('.filter-item').forEach(item => {
+            item.addEventListener('click', function() {
+                alert(`Выбран фильтр: ${this.textContent}`);
+            });
+        });
+    </script>
+</body>
+</html>
