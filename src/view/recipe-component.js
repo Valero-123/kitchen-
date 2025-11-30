@@ -3,9 +3,11 @@ import { AbstractComponent } from './abstract-component.js';
 function createRecipeComponentTemplate(recipe) {
   const { id, title, time, difficulty, rating, description, tags, badge } = recipe;
   
+  const badgeClass = badge === 'Тренд' ? 'trending' : '';
+  
   return `
     <div class="popular-card" data-recipe-id="${id}">
-      ${badge ? `<div class="card-badge ${badge === 'Тренд' ? 'trending' : ''}">${badge}</div>` : ''}
+      ${badge ? `<div class="card-badge ${badgeClass}">${badge}</div>` : ''}
       <div class="card-content">
         <h3 class="card-title">${title}</h3>
         <div class="card-meta">

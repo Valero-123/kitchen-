@@ -21,8 +21,7 @@ export default class RecipeModel {
             cuisine: recipeData.cuisine,
             cookingTime: recipeData.cookingTime,
             difficultyLevel: recipeData.difficultyLevel,
-            category: recipeData.category || "Основные",
-            ingredients: recipeData.ingredients || []
+            category: recipeData.category || "Основные"
         };
         
         this.#recipes.push(newRecipe);
@@ -45,8 +44,6 @@ export default class RecipeModel {
     filterRecipes(filters = {}) {
         let filteredRecipes = [...this.#recipes];
 
-        console.log('Applying filters:', filters);
-
         // Filter by cuisine
         if (filters.cuisine && filters.cuisine !== '') {
             filteredRecipes = filteredRecipes.filter(recipe => {
@@ -62,9 +59,7 @@ export default class RecipeModel {
             filteredRecipes = filteredRecipes.filter(recipe => {
                 return recipe.title.toLowerCase().includes(searchTerm) ||
                        recipe.description.toLowerCase().includes(searchTerm) ||
-                       recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
-                       (recipe.ingredients && recipe.ingredients.some(ingredient => 
-                           ingredient.toLowerCase().includes(searchTerm)));
+                       recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm));
             });
         }
 
@@ -98,7 +93,6 @@ export default class RecipeModel {
         // Filter by category
         if (filters.category && filters.category !== '') {
             filteredRecipes = filteredRecipes.filter(recipe => {
-                // Check if any tag matches the category
                 return recipe.tags.some(tag => tag === filters.category) ||
                        recipe.category === filters.category;
             });
@@ -120,12 +114,10 @@ export default class RecipeModel {
             });
         }
 
-        console.log('Filtered results:', filteredRecipes.length);
         return filteredRecipes;
     }
 
     #extractCuisineName(cuisineString) {
-        // Remove emoji flags and trim
         return cuisineString.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇹🇭🇺🇸🇪🇸🇭🇺🇮🇱🇱🇧🇰🇷🇨🇺🇬🇷🇮🇳🇻🇳]/g, '').trim();
     }
 
@@ -143,25 +135,6 @@ export default class RecipeModel {
         }
     }
 
-    // Get all unique tags for statistics
-    getAllTags() {
-        const allTags = new Set();
-        this.#recipes.forEach(recipe => {
-            recipe.tags.forEach(tag => allTags.add(tag));
-        });
-        return Array.from(allTags);
-    }
-
-    // Get all unique cuisines
-    getAllCuisines() {
-        const cuisines = new Set();
-        this.#recipes.forEach(recipe => {
-            cuisines.add(recipe.cuisine);
-        });
-        return Array.from(cuisines);
-    }
-
-    // Observer pattern implementation
     addObserver(observer) {
         this.#observers.push(observer);
     }

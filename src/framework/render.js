@@ -12,14 +12,11 @@ function createElement(template) {
 }
 
 function render(component, container, place = RenderPosition.BEFOREEND) {
-  // Проверяем, есть ли у компонента метод getElement
   if (component && typeof component.getElement === 'function') {
     const element = component.getElement();
     if (element && container) {
       container.insertAdjacentElement(place, element);
     }
-  } else {
-    console.error('Component does not have getElement method:', component);
   }
 }
 

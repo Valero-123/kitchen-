@@ -6,19 +6,6 @@
     <title>FlavorHub - Кулинарные рецепты</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Temporary debug styles -->
-    <style>
-        .debug-border {
-            border: 2px dashed #10b981 !important;
-            padding: 10px !important;
-            margin: 10px 0 !important;
-        }
-        .debug-red { border-color: #ef4444 !important; }
-        .debug-blue { border-color: #3b82f6 !important; }
-        .debug-green { border-color: #10b981 !important; }
-        .debug-yellow { border-color: #f59e0b !important; }
-    </style>
 </head>
 <body class="board-app">
     <!-- Header will be rendered here by JavaScript -->
@@ -30,12 +17,9 @@
                 <p class="hero-subtitle">Более 1000 проверенных рецептов для вашей кухни</p>
             </div>
 
-            <!-- MAIN CONTAINER WHERE COMPONENTS WILL BE RENDERED -->
-            <div id="recipeBoardContainer" class="recipe-board-container debug-border debug-red">
-                <!-- JavaScript will render here: -->
-                <!-- 1. FormAddRecipeComponent (search + filters) -->
-                <!-- 2. RecipeListComponent (recipes list) -->
-                <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+            <!-- Main container for components -->
+            <div id="recipeBoardContainer" class="recipe-board-container">
+                <div class="loading-message">
                     Загрузка рецептов...
                 </div>
             </div>
