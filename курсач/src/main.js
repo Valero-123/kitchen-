@@ -14,42 +14,24 @@ if (existingHeader) {
     existingHeader.remove();
 }
 
-const existingFilters = document.querySelector('.filters');
-if (existingFilters) {
-    existingFilters.remove();
-}
-
-const existingSearch = document.querySelector('.search-section');
-if (existingSearch) {
-    existingSearch.remove();
-}
-
-const existingPopularSection = document.querySelector('.popular-section');
-if (existingPopularSection) {
-    existingPopularSection.remove();
-}
-
-const existingAddButton = document.querySelector('.more-link');
-if (existingAddButton) {
-    existingAddButton.remove();
-}
+// We don't remove existing filters and search because they don't exist in the new HTML
 
 // Render header
 const headerComponent = new HeaderComponent();
 render(headerComponent, bodyContainer, RenderPosition.AFTERBEGIN);
 
-// Find the container for recipe board (after hero section)
-const heroSection = document.querySelector('.hero-section');
-const boardContainer = document.createElement('div');
-boardContainer.className = 'recipe-board-container';
-heroSection.parentNode.insertBefore(boardContainer, heroSection.nextSibling);
+// Find the container for recipe board
+const recipeBoardContainer = document.getElementById('recipeBoardContainer');
+if (!recipeBoardContainer) {
+    console.error('Recipe board container not found!');
+}
 
 // Initialize model and presenter
 const recipeModel = new RecipeModel();
-const recipesBoardPresenter = new RecipesBoardPresenter(recipeModel, boardContainer);
+const recipesBoardPresenter = new RecipesBoardPresenter(recipeModel, recipeBoardContainer);
 recipesBoardPresenter.init();
 
-// Theme toggle functionality
+// Theme toggle functionality with event delegation
 document.addEventListener('click', function(event) {
     if (event.target.closest('#themeToggle')) {
         const themeToggle = event.target.closest('#themeToggle');
@@ -60,12 +42,12 @@ document.addEventListener('click', function(event) {
         
         if (document.body.classList.contains('dark-theme')) {
             localStorage.setItem('theme', 'dark');
-            themeIcon.textContent = '☀️';
-            themeText.textContent = 'Светлая тема';
+            if (themeIcon) themeIcon.textContent = '☀️';
+            if (themeText) themeText.textContent = 'Светлая тема';
         } else {
             localStorage.setItem('theme', 'light');
-            themeIcon.textContent = '🌙';
-            themeText.textContent = 'Темная тема';
+            if (themeIcon) themeIcon.textContent = '🌙';
+            if (themeText) themeText.textContent = 'Темная тема';
         }
     }
 });
@@ -78,8 +60,8 @@ if (savedTheme === 'dark') {
     if (themeToggle) {
         const themeIcon = themeToggle.querySelector('.theme-icon');
         const themeText = themeToggle.querySelector('.theme-text');
-        themeIcon.textContent = '☀️';
-        themeText.textContent = 'Светлая тема';
+        if (themeIcon) themeIcon.textContent = '☀️';
+        if (themeText) themeText.textContent = 'Светлая тема';
     }
 }
 
@@ -94,3 +76,85 @@ if (subscribeForm) {
         this.reset();
     });
 }
+
+// Add CSS for dynamically created elements
+const style = document.createElement('style');
+style.textContent = `
+    .recipe-board-container {
+        width: 100%;
+        margin: 2rem 0;
+    }
+    
+    .recipe-board-container .search-section {
+        display: flex;
+        gap: 1rem;
+        margin: 2rem auto;
+        max-width: 600px;
+        background: var(--surface);
+        padding: 1.5rem;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .recipe-board-container .filters {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin: 3rem 0;
+    }
+    
+    .recipe-board-container .popular-section {
+        margin: 4rem 0;
+    }
+    
+    .recipe-board-container .more-link {
+        display: block;
+        width: 100%;
+        max-width: 320px;
+        margin: 2rem auto;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 1.3rem 2.5rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--surface);
+        border-radius: 20px;
+        border: 2px dashed var(--border);
+        margin: 2rem 0;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+    
+    .empty-state p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+`;
+document.head.appendChild(style);

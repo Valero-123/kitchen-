@@ -7,13 +7,15 @@ import { render } from '../framework/render.js';
 export default class RecipesBoardPresenter {
     #recipeModel = null;
     #boardContainer = null;
-    #formAddRecipeComponent = new FormAddRecipeComponent();
-    #recipeListComponent = new RecipeListComponent();
+    #formAddRecipeComponent = null;
+    #recipeListComponent = null;
     #currentFilters = {};
 
     constructor(recipeModel, boardContainer) {
         this.#recipeModel = recipeModel;
         this.#boardContainer = boardContainer;
+        this.#formAddRecipeComponent = new FormAddRecipeComponent();
+        this.#recipeListComponent = new RecipeListComponent();
         this.#recipeModel.addObserver(this.#handleModelChange.bind(this));
     }
 
@@ -22,6 +24,9 @@ export default class RecipesBoardPresenter {
     }
 
     #renderBoard() {
+        // Clear the container first
+        this.#boardContainer.innerHTML = '';
+        
         // Render form with filters and search
         render(this.#formAddRecipeComponent, this.#boardContainer);
         
