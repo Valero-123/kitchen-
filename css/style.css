@@ -1396,7 +1396,68 @@ footer {
 .remove-filter:hover {
     opacity: 1;
     background: rgba(255,255,255,0.3);
+}
+/* Анимации для карточек рецептов */
+.popular-card {
+    transition: all 0.5s ease !important;
+}
 
+/* Убедитесь, что контейнер для рецептов правильно отображается */
+.popular-grid {
+    min-height: 200px;
+}
+
+/* Стили для активных фильтров */
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin: 0.25rem;
+}
+
+.filter-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.remove-filter {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    padding: 2px 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+}
+
+.remove-filter:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.3);
+}
+
+.clear-all-filters-btn {
+    background: var(--surface-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.clear-all-filters-btn:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
 }
 /* Стили для кнопки очистки всех фильтров */
 .clear-all-filters-btn {
@@ -1565,4 +1626,347 @@ body.dark-theme .clear-all-filters-btn:hover {
     background: var(--error);
     color: white;
     border-color: var(--error);
+}
+/* Стили для Drag&Drop */
+.draggable-recipe {
+  cursor: grab;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.draggable-recipe:active {
+  cursor: grabbing;
+}
+
+.draggable-recipe.dragging {
+  transform: rotate(5deg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+.draggable-recipe.drag-over {
+  border: 2px dashed var(--primary);
+  background: var(--surface-light);
+  transform: scale(1.02);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+  font-size: 1.2rem;
+  z-index: 10;
+}
+
+.drag-handle:hover {
+  opacity: 1;
+}
+
+.recipes-list.drop-zone-active {
+  background: var(--surface-light);
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+/* Анимации для перетаскивания */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popular-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Улучшенные стили для карточек при перетаскивании */
+.popular-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.popular-card:hover .drag-handle {
+  opacity: 1;
+}
+/* Исправления для отображения карточек рецептов */
+.popular-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+  width: 100%;
+}
+
+.popular-card {
+  background: var(--surface);
+  border-radius: 24px;
+  overflow: visible;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border);
+  position: relative;
+  opacity: 1 !important;
+  transform: none !important;
+  height: auto;
+  min-height: 300px;
+}
+
+.popular-card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary-light);
+  box-shadow: var(--shadow-xl);
+}
+
+.card-content {
+  padding: 2rem;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+.card-description {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  flex-grow: 1;
+}
+
+.card-tags {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: var(--surface-light);
+  color: var(--text-secondary);
+  padding: 0.4rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--border-light);
+}
+
+.card-btn {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+}
+
+.change, .delete {
+  flex: 1;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.8rem;
+}
+
+/* Drag & Drop стили */
+.draggable-recipe {
+  cursor: grab;
+  transition: all 0.3s ease;
+}
+
+.draggable-recipe:active {
+  cursor: grabbing;
+}
+
+.draggable-recipe.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+.draggable-recipe.drag-over {
+  border: 2px dashed var(--primary);
+  background: var(--surface-light);
+}
+
+.drag-handle {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  cursor: grab;
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  z-index: 10;
+  padding: 0.5rem;
+}
+
+.drag-handle:hover {
+  opacity: 0.8;
+}
+
+.recipes-container.drop-zone-active {
+  background: var(--surface-light);
+  border: 2px dashed var(--primary);
+  border-radius: 12px;
+}
+
+/* Убедимся, что контейнер правильно отображает карточки */
+#recipesContainer {
+  min-height: 400px;
+  position: relative;
+}
+
+/* Анимации для появления карточек */
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.popular-card {
+  animation: cardAppear 0.5s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .popular-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .popular-card {
+    margin: 0;
+  }
+  
+  .card-content {
+    padding: 1.5rem;
+  }
+}/* Стили для кнопки добавления рецепта в поисковой секции */
+.add-recipe-main-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.add-recipe-main-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.add-recipe-main-btn .add-recipe-icon {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+/* Стили для выпадающего списка фильтров */
+.filters-dropdown-section {
+  margin: 1.5rem 0;
+}
+
+.filters-dropdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.2rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--surface-light);
+}
+
+.dropdown-header:hover {
+  background: var(--surface-dark);
+}
+
+.dropdown-icon {
+  font-size: 1.2rem;
+}
+
+.dropdown-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1.1rem;
+}
+
+.dropdown-arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+  color: var(--text-muted);
+}
+
+.dropdown-content {
+  display: none;
+  padding: 1.5rem;
+  background: var(--surface);
+}
+
+.dropdown-content.active {
+  display: block;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Адаптивность для выпадающего списка */
+@media (max-width: 768px) {
+  .filters-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .dropdown-content {
+    padding: 1rem;
+  }
+  
+  .dropdown-header {
+    padding: 1rem;
+  }
 }
