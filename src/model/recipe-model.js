@@ -20,7 +20,9 @@ export default class RecipeModel {
             badge: "Новинка",
             cuisine: recipeData.cuisine,
             cookingTime: recipeData.cookingTime,
-            difficultyLevel: recipeData.difficultyLevel
+            difficultyLevel: recipeData.difficultyLevel,
+            category: recipeData.category || "Основные",
+            ingredients: recipeData.ingredients || []
         };
         
         this.#recipes.push(newRecipe);
@@ -43,8 +45,10 @@ export default class RecipeModel {
     filterRecipes(filters = {}) {
         let filteredRecipes = [...this.#recipes];
 
+        console.log('Applying filters:', filters);
+
         // Filter by cuisine
-        if (filters.cuisine && filters.cuisine !== 'Выберите кухню') {
+        if (filters.cuisine && filters.cuisine !== '') {
             filteredRecipes = filteredRecipes.filter(recipe => {
                 const recipeCuisine = this.#extractCuisineName(recipe.cuisine);
                 const filterCuisine = this.#extractCuisineName(filters.cuisine);
@@ -58,47 +62,76 @@ export default class RecipeModel {
             filteredRecipes = filteredRecipes.filter(recipe => {
                 return recipe.title.toLowerCase().includes(searchTerm) ||
                        recipe.description.toLowerCase().includes(searchTerm) ||
-                       recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm));
+                       recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                       (recipe.ingredients && recipe.ingredients.some(ingredient => 
+                           ingredient.toLowerCase().includes(searchTerm)));
             });
         }
 
         // Filter by cooking time
-        if (filters.time && filters.time !== 'Любое время') {
+        if (filters.time && filters.time !== '') {
             filteredRecipes = filteredRecipes.filter(recipe => {
-                if (filters.time === 'До 30 минут') {
-                    return this.#extractTimeMinutes(recipe.time) <= 30;
-                } else if (filters.time === 'До 1 часа') {
-                    return this.#extractTimeMinutes(recipe.time) <= 60;
-                } else if (filters.time === 'Более 1 часа') {
-                    return this.#extractTimeMinutes(recipe.time) > 60;
+                const timeMinutes = this.#extractTimeMinutes(recipe.time);
+                
+                switch (filters.time) {
+                    case 'fast':
+                        return timeMinutes <= 20;
+                    case 'short':
+                        return timeMinutes <= 30;
+                    case 'medium':
+                        return timeMinutes <= 60;
+                    case 'long':
+                        return timeMinutes > 60;
+                    default:
+                        return true;
                 }
-                return true;
             });
         }
 
         // Filter by difficulty
-        if (filters.difficulty && filters.difficulty !== 'Любая сложность') {
+        if (filters.difficulty && filters.difficulty !== '') {
             filteredRecipes = filteredRecipes.filter(recipe => {
-                if (filters.difficulty === '👶 Начинающий') {
-                    return recipe.difficulty.includes('Начинающий') || recipe.difficulty.includes('👶');
-                } else if (filters.difficulty === '👨‍🍳 Любитель') {
-                    return recipe.difficulty.includes('Средне') || recipe.difficulty.includes('👨‍🍳');
-                } else if (filters.difficulty === '🧑‍🍳 Профессионал') {
-                    return recipe.difficulty.includes('Сложно') || recipe.difficulty.includes('🧑‍🍳');
-                }
-                return true;
+                return recipe.difficultyLevel === filters.difficulty;
             });
         }
 
+        // Filter by category
+        if (filters.category && filters.category !== '') {
+            filteredRecipes = filteredRecipes.filter(recipe => {
+                // Check if any tag matches the category
+                return recipe.tags.some(tag => tag === filters.category) ||
+                       recipe.category === filters.category;
+            });
+        }
+
+        // Filter by rating
+        if (filters.rating && filters.rating !== '') {
+            const minRating = parseFloat(filters.rating);
+            filteredRecipes = filteredRecipes.filter(recipe => {
+                const recipeRating = parseFloat(recipe.rating);
+                return recipeRating >= minRating;
+            });
+        }
+
+        // Filter by tags
+        if (filters.tags && filters.tags !== '') {
+            filteredRecipes = filteredRecipes.filter(recipe => {
+                return recipe.tags.some(tag => tag === filters.tags);
+            });
+        }
+
+        console.log('Filtered results:', filteredRecipes.length);
         return filteredRecipes;
     }
 
     #extractCuisineName(cuisineString) {
         // Remove emoji flags and trim
-        return cuisineString.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽]/g, '').trim();
+        return cuisineString.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇹🇭🇺🇸🇪🇸🇭🇺🇮🇱🇱🇧🇰🇷🇨🇺🇬🇷🇮🇳🇻🇳]/g, '').trim();
     }
 
     #extractTimeMinutes(timeString) {
+        if (!timeString) return 0;
+        
         if (timeString.includes('ч')) {
             const hours = parseInt(timeString) || 0;
             const minutesMatch = timeString.match(/(\d+)\s*мин/);
@@ -108,6 +141,24 @@ export default class RecipeModel {
             const minutesMatch = timeString.match(/(\d+)/);
             return minutesMatch ? parseInt(minutesMatch[1]) : 0;
         }
+    }
+
+    // Get all unique tags for statistics
+    getAllTags() {
+        const allTags = new Set();
+        this.#recipes.forEach(recipe => {
+            recipe.tags.forEach(tag => allTags.add(tag));
+        });
+        return Array.from(allTags);
+    }
+
+    // Get all unique cuisines
+    getAllCuisines() {
+        const cuisines = new Set();
+        this.#recipes.forEach(recipe => {
+            cuisines.add(recipe.cuisine);
+        });
+        return Array.from(cuisines);
     }
 
     // Observer pattern implementation

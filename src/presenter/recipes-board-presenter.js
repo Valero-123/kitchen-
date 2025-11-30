@@ -55,6 +55,12 @@ export default class RecipesBoardPresenter {
 
         console.log('Filtered recipes:', filteredRecipes.length, 'with filters:', this.#currentFilters);
 
+        // Update active filters display
+        this.#updateActiveFiltersDisplay();
+
+        // Add results counter
+        this.#updateResultsCounter(filteredRecipes.length);
+
         if (filteredRecipes.length === 0) {
             const emptyComponent = new EmptyComponent();
             render(emptyComponent, recipesContainer);
@@ -73,6 +79,7 @@ export default class RecipesBoardPresenter {
         // Search functionality
         const searchInput = this.#boardContainer.querySelector('.search-input');
         const searchBtn = this.#boardContainer.querySelector('.search-btn');
+        const clearFiltersBtn = this.#boardContainer.querySelector('.clear-filters-btn');
 
         if (searchInput && searchBtn) {
             const performSearch = () => {
@@ -95,6 +102,13 @@ export default class RecipesBoardPresenter {
                     delete this.#currentFilters.search;
                     this.#renderRecipes();
                 }
+            });
+        }
+
+        // Clear all filters
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener('click', () => {
+                this.#clearAllFilters();
             });
         }
 
@@ -128,31 +142,201 @@ export default class RecipesBoardPresenter {
             });
         }
 
+        // Filter functionality - category
+        const categoryFilter = this.#boardContainer.querySelector('#categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.addEventListener('change', () => {
+                this.#currentFilters.category = categoryFilter.value;
+                console.log('Category filter changed:', categoryFilter.value);
+                this.#renderRecipes();
+            });
+        }
+
+        // Filter functionality - rating
+        const ratingFilter = this.#boardContainer.querySelector('#ratingFilter');
+        if (ratingFilter) {
+            ratingFilter.addEventListener('change', () => {
+                this.#currentFilters.rating = ratingFilter.value;
+                console.log('Rating filter changed:', ratingFilter.value);
+                this.#renderRecipes();
+            });
+        }
+
+        // Filter functionality - tags
+        const tagsFilter = this.#boardContainer.querySelector('#tagsFilter');
+        if (tagsFilter) {
+            tagsFilter.addEventListener('change', () => {
+                this.#currentFilters.tags = tagsFilter.value;
+                console.log('Tags filter changed:', tagsFilter.value);
+                this.#renderRecipes();
+            });
+        }
+
         // Add new recipe button
         const addRecipeBtn = this.#boardContainer.querySelector('.more-link');
         if (addRecipeBtn) {
             addRecipeBtn.addEventListener('click', this.#handleAddRecipe.bind(this));
         }
+    }
 
-        // Reset filters button
-        const resetFilters = () => {
-            this.#currentFilters = {};
-            if (searchInput) searchInput.value = '';
-            if (cuisineFilter) cuisineFilter.selectedIndex = 0;
-            if (timeFilter) timeFilter.selectedIndex = 0;
-            if (difficultyFilter) difficultyFilter.selectedIndex = 0;
-            this.#renderRecipes();
+    #clearAllFilters() {
+        this.#currentFilters = {};
+        
+        // Reset all filter inputs
+        const searchInput = this.#boardContainer.querySelector('.search-input');
+        const cuisineFilter = this.#boardContainer.querySelector('#cuisineFilter');
+        const timeFilter = this.#boardContainer.querySelector('#timeFilter');
+        const difficultyFilter = this.#boardContainer.querySelector('#difficultyFilter');
+        const categoryFilter = this.#boardContainer.querySelector('#categoryFilter');
+        const ratingFilter = this.#boardContainer.querySelector('#ratingFilter');
+        const tagsFilter = this.#boardContainer.querySelector('#tagsFilter');
+
+        if (searchInput) searchInput.value = '';
+        if (cuisineFilter) cuisineFilter.selectedIndex = 0;
+        if (timeFilter) timeFilter.selectedIndex = 0;
+        if (difficultyFilter) difficultyFilter.selectedIndex = 0;
+        if (categoryFilter) categoryFilter.selectedIndex = 0;
+        if (ratingFilter) ratingFilter.selectedIndex = 0;
+        if (tagsFilter) tagsFilter.selectedIndex = 0;
+
+        this.#renderRecipes();
+        console.log('All filters cleared');
+    }
+
+    #updateActiveFiltersDisplay() {
+        const activeFiltersContainer = this.#boardContainer.querySelector('#activeFilters');
+        const activeFiltersList = this.#boardContainer.querySelector('#activeFiltersList');
+
+        if (!activeFiltersContainer || !activeFiltersList) return;
+
+        const activeFilters = Object.entries(this.#currentFilters)
+            .filter(([key, value]) => value && value !== '');
+
+        if (activeFilters.length === 0) {
+            activeFiltersContainer.style.display = 'none';
+            return;
+        }
+
+        activeFiltersContainer.style.display = 'block';
+        activeFiltersList.innerHTML = '';
+
+        activeFilters.forEach(([key, value]) => {
+            const filterChip = document.createElement('div');
+            filterChip.className = 'filter-chip';
+            filterChip.style.cssText = `
+                display: inline-flex;
+                align-items: center;
+                background: var(--primary);
+                color: white;
+                padding: 0.5rem 1rem;
+                border-radius: 20px;
+                margin: 0.25rem;
+                font-size: 0.85rem;
+                font-weight: 500;
+            `;
+
+            const filterName = this.#getFilterDisplayName(key, value);
+            filterChip.innerHTML = `
+                ${filterName}
+                <span class="remove-filter" style="margin-left: 0.5rem; cursor: pointer; font-weight: bold;">×</span>
+            `;
+
+            const removeBtn = filterChip.querySelector('.remove-filter');
+            removeBtn.addEventListener('click', () => {
+                this.#removeFilter(key);
+            });
+
+            activeFiltersList.appendChild(filterChip);
+        });
+    }
+
+    #updateResultsCounter(resultsCount) {
+        let resultsCounter = this.#boardContainer.querySelector('.results-counter');
+        
+        if (!resultsCounter) {
+            resultsCounter = document.createElement('div');
+            resultsCounter.className = 'results-counter';
+            resultsCounter.style.cssText = `
+                text-align: center;
+                margin: 1rem 0;
+                color: var(--text-secondary);
+                font-size: 0.9rem;
+                font-weight: 500;
+            `;
+            
+            const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
+            if (recipesContainer) {
+                recipesContainer.parentNode.insertBefore(resultsCounter, recipesContainer);
+            }
+        }
+        
+        const totalRecipes = this.#recipeModel.recipes.length;
+        if (resultsCount === totalRecipes) {
+            resultsCounter.textContent = `Найдено все рецепты: ${resultsCount}`;
+        } else {
+            resultsCounter.textContent = `Найдено рецептов: ${resultsCount} из ${totalRecipes}`;
+        }
+    }
+
+    #getFilterDisplayName(key, value) {
+        const displayNames = {
+            cuisine: `🌍 ${value.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇹🇭🇺🇸🇪🇸🇭🇺🇮🇱🇱🇧🇰🇷🇨🇺🇬🇷🇮🇳🇻🇳]/g, '').trim()}`,
+            time: `⏱️ ${this.#getTimeDisplayName(value)}`,
+            difficulty: `📊 ${this.#getDifficultyDisplayName(value)}`,
+            category: `🍽️ ${value}`,
+            rating: `⭐ ${value}+`,
+            tags: `🏷️ ${value}`,
+            search: `🔍 "${value}"`
         };
 
-        // Add reset filters functionality to search input clear
-        if (searchInput) {
-            searchInput.addEventListener('search', () => {
-                if (searchInput.value === '') {
-                    delete this.#currentFilters.search;
-                    this.#renderRecipes();
+        return displayNames[key] || `${key}: ${value}`;
+    }
+
+    #getTimeDisplayName(timeKey) {
+        const timeNames = {
+            'fast': 'До 20 мин',
+            'short': 'До 30 мин',
+            'medium': 'До 1 часа',
+            'long': 'Более 1 часа'
+        };
+        return timeNames[timeKey] || timeKey;
+    }
+
+    #getDifficultyDisplayName(difficultyKey) {
+        const difficultyNames = {
+            'easy': 'Начинающий',
+            'medium': 'Любитель',
+            'hard': 'Профессионал'
+        };
+        return difficultyNames[difficultyKey] || difficultyKey;
+    }
+
+    #removeFilter(key) {
+        delete this.#currentFilters[key];
+        
+        // Reset the corresponding input
+        const filterInputs = {
+            cuisine: '#cuisineFilter',
+            time: '#timeFilter',
+            difficulty: '#difficultyFilter',
+            category: '#categoryFilter',
+            rating: '#ratingFilter',
+            tags: '#tagsFilter',
+            search: '.search-input'
+        };
+
+        if (filterInputs[key]) {
+            const input = this.#boardContainer.querySelector(filterInputs[key]);
+            if (input) {
+                if (key === 'search') {
+                    input.value = '';
+                } else {
+                    input.selectedIndex = 0;
                 }
-            });
+            }
         }
+
+        this.#renderRecipes();
     }
 
     #setupRecipeEventListeners() {
@@ -187,16 +371,19 @@ export default class RecipesBoardPresenter {
             const description = prompt('Введите описание рецепта:') || "Новый рецепт - описание можно добавить позже";
             const time = prompt('Введите время приготовления (например, "30 мин"):') || "30 мин";
             const difficulty = prompt('Введите сложность (например, "👶 Начинающий"):') || "👶 Начинающий";
+            const cuisine = prompt('Введите кухню (например, "🇷🇺 Русская"):') || "🇷🇺 Русская";
+            const tags = prompt('Введите теги через запятую:') || "Новые";
             
             const newRecipe = {
                 title: title,
                 time: time,
                 difficulty: difficulty,
                 description: description,
-                tags: ["Новые"],
-                cuisine: "Русская",
+                tags: tags.split(',').map(tag => tag.trim()),
+                cuisine: cuisine,
                 cookingTime: "medium",
-                difficultyLevel: "easy"
+                difficultyLevel: "easy",
+                category: "Основные"
             };
             
             this.#recipeModel.addRecipe(newRecipe);
@@ -276,6 +463,31 @@ export default class RecipesBoardPresenter {
                     <option value="🇨🇳 Китайская" ${recipe.cuisine.includes('Китайская') ? 'selected' : ''}>🇨🇳 Китайская</option>
                     <option value="🇯🇵 Японская" ${recipe.cuisine.includes('Японская') ? 'selected' : ''}>🇯🇵 Японская</option>
                     <option value="🇲🇽 Мексиканская" ${recipe.cuisine.includes('Мексиканская') ? 'selected' : ''}>🇲🇽 Мексиканская</option>
+                    <option value="🇹🇭 Тайская" ${recipe.cuisine.includes('Тайская') ? 'selected' : ''}>🇹🇭 Тайская</option>
+                    <option value="🇺🇸 Американская" ${recipe.cuisine.includes('Американская') ? 'selected' : ''}>🇺🇸 Американская</option>
+                    <option value="🇪🇸 Испанская" ${recipe.cuisine.includes('Испанская') ? 'selected' : ''}>🇪🇸 Испанская</option>
+                    <option value="🇭🇺 Венгерская" ${recipe.cuisine.includes('Венгерская') ? 'selected' : ''}>🇭🇺 Венгерская</option>
+                    <option value="🇮🇱 Израильская" ${recipe.cuisine.includes('Израильская') ? 'selected' : ''}>🇮🇱 Израильская</option>
+                    <option value="🇱🇧 Ливанская" ${recipe.cuisine.includes('Ливанская') ? 'selected' : ''}>🇱🇧 Ливанская</option>
+                    <option value="🇰🇷 Корейская" ${recipe.cuisine.includes('Корейская') ? 'selected' : ''}>🇰🇷 Корейская</option>
+                    <option value="🇨🇺 Кубинская" ${recipe.cuisine.includes('Кубинская') ? 'selected' : ''}>🇨🇺 Кубинская</option>
+                    <option value="🇬🇷 Греческая" ${recipe.cuisine.includes('Греческая') ? 'selected' : ''}>🇬🇷 Греческая</option>
+                    <option value="🇮🇳 Индийская" ${recipe.cuisine.includes('Индийская') ? 'selected' : ''}>🇮🇳 Индийская</option>
+                    <option value="🇻🇳 Вьетнамская" ${recipe.cuisine.includes('Вьетнамская') ? 'selected' : ''}>🇻🇳 Вьетнамская</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 1rem;">
+                <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary);">Тип блюда:</label>
+                <select id="editCategory" style="width: 100%; padding: 0.8rem; border: 2px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text-primary);">
+                    <option value="Закуски" ${recipe.tags.includes('Закуски') ? 'selected' : ''}>🥗 Закуски</option>
+                    <option value="Супы" ${recipe.tags.includes('Супы') ? 'selected' : ''}>🍲 Супы</option>
+                    <option value="Основные" ${recipe.tags.includes('Основные') ? 'selected' : ''}>🍛 Основные блюда</option>
+                    <option value="Десерты" ${recipe.tags.includes('Десерты') ? 'selected' : ''}>🍰 Десерты</option>
+                    <option value="Завтраки" ${recipe.tags.includes('Завтраки') ? 'selected' : ''}>🥞 Завтраки</option>
+                    <option value="Напитки" ${recipe.tags.includes('Напитки') ? 'selected' : ''}>🍹 Напитки</option>
+                    <option value="Салаты" ${recipe.tags.includes('Салаты') ? 'selected' : ''}>🥙 Салаты</option>
+                    <option value="Выпечка" ${recipe.tags.includes('Выпечка') ? 'selected' : ''}>🥖 Выпечка</option>
                 </select>
             </div>
 
@@ -308,7 +520,8 @@ export default class RecipesBoardPresenter {
                 time: form.querySelector('#editTime').value,
                 difficulty: form.querySelector('#editDifficulty').value,
                 cuisine: form.querySelector('#editCuisine').value,
-                tags: form.querySelector('#editTags').value.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+                tags: form.querySelector('#editTags').value.split(',').map(tag => tag.trim()).filter(tag => tag !== ''),
+                category: form.querySelector('#editCategory').value
             };
 
             if (updatedData.title.trim() === '') {
@@ -325,6 +538,14 @@ export default class RecipesBoardPresenter {
         modal.addEventListener('click', (event) => {
             if (event.target === modal) {
                 document.body.removeChild(modal);
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function closeModalOnEscape(event) {
+            if (event.key === 'Escape') {
+                document.body.removeChild(modal);
+                document.removeEventListener('keydown', closeModalOnEscape);
             }
         });
     }

@@ -1092,3 +1092,149 @@ footer {
 .search-input:not(:placeholder-shown) {
     border-color: var(--primary);
 }
+/* Enhanced Filters Styles */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.search-section {
+    display: flex;
+    gap: 1rem;
+    margin: 2rem auto;
+    max-width: 800px;
+    background: var(--surface);
+    padding: 1.5rem;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    align-items: center;
+}
+
+.search-section .search-input {
+    flex: 1;
+}
+
+.search-section .clear-filters-btn {
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.search-section .clear-filters-btn:hover {
+    background: var(--surface-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Active Filters Display */
+.active-filters {
+    background: var(--surface-light);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+}
+
+.active-filters-title {
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.active-filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.remove-filter {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.remove-filter:hover {
+    opacity: 1;
+}
+
+/* Enhanced dropdown styles */
+.dropdown {
+    width: 100%;
+    height: 55px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    padding: 0 1.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1.5rem center;
+    background-size: 1.2em;
+}
+
+.dropdown:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Active filter state */
+.dropdown:not([value=""]):not([value="Все кухни"]):not([value="Любое время"]):not([value="Любая сложность"]):not([value="Все типы"]):not([value="Любой рейтинг"]):not([value="Все теги"]) {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, var(--surface), var(--surface-light));
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+/* Results counter */
+.results-counter {
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Responsive design for filters */
+@media (max-width: 768px) {
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .search-section {
+        flex-direction: column;
+    }
+    
+    .search-section .clear-filters-btn {
+        width: 100%;
+    }
+    
+    .active-filters-list {
+        justify-content: center;
+    }
+}
