@@ -3,7 +3,6 @@ import { AbstractComponent } from '../framework/view/abstract-component.js';
 function createFormAddRecipeComponentTemplate() {
   return `
     <div class="search-section">
-      <h2 style="color: red;">ТЕСТ: Форма загружена!</h2>
       <input type="text" class="search-input" placeholder="🔍 Поиск рецептов по названию, ингредиентам...">
       <button class="search-btn" type="button">Найти</button>
       <button class="add-recipe-main-btn" type="button">
