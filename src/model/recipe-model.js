@@ -44,9 +44,11 @@ export default class RecipeModel {
         let filteredRecipes = [...this.#recipes];
 
         // Filter by cuisine
-        if (filters.cuisine && filters.cuisine !== 'Выберите кухню' && filters.cuisine !== 'Любая кухня') {
+        if (filters.cuisine && filters.cuisine !== 'Выберите кухню') {
             filteredRecipes = filteredRecipes.filter(recipe => {
-                return recipe.cuisine && recipe.cuisine.toLowerCase().includes(filters.cuisine.toLowerCase().replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽]/g, '').trim());
+                const recipeCuisine = this.#extractCuisineName(recipe.cuisine);
+                const filterCuisine = this.#extractCuisineName(filters.cuisine);
+                return recipeCuisine === filterCuisine;
             });
         }
 
@@ -64,11 +66,11 @@ export default class RecipeModel {
         if (filters.time && filters.time !== 'Любое время') {
             filteredRecipes = filteredRecipes.filter(recipe => {
                 if (filters.time === 'До 30 минут') {
-                    return recipe.time.includes('25 мин') || recipe.time.includes('20 мин') || recipe.time.includes('30 мин');
+                    return this.#extractTimeMinutes(recipe.time) <= 30;
                 } else if (filters.time === 'До 1 часа') {
-                    return recipe.time.includes('35 мин') || recipe.time.includes('40 мин') || recipe.time.includes('45 мин') || recipe.time.includes('50 мин') || recipe.time.includes('55 мин');
+                    return this.#extractTimeMinutes(recipe.time) <= 60;
                 } else if (filters.time === 'Более 1 часа') {
-                    return recipe.time.includes('1 ч') || recipe.time.includes('90 мин') || recipe.time.includes('2 ч');
+                    return this.#extractTimeMinutes(recipe.time) > 60;
                 }
                 return true;
             });
@@ -77,11 +79,11 @@ export default class RecipeModel {
         // Filter by difficulty
         if (filters.difficulty && filters.difficulty !== 'Любая сложность') {
             filteredRecipes = filteredRecipes.filter(recipe => {
-                if (filters.difficulty === 'Начинающий' || filters.difficulty === '👶 Начинающий') {
+                if (filters.difficulty === '👶 Начинающий') {
                     return recipe.difficulty.includes('Начинающий') || recipe.difficulty.includes('👶');
-                } else if (filters.difficulty === 'Любитель' || filters.difficulty === '👨‍🍳 Любитель') {
+                } else if (filters.difficulty === '👨‍🍳 Любитель') {
                     return recipe.difficulty.includes('Средне') || recipe.difficulty.includes('👨‍🍳');
-                } else if (filters.difficulty === 'Профессионал' || filters.difficulty === '🧑‍🍳 Профессионал') {
+                } else if (filters.difficulty === '🧑‍🍳 Профессионал') {
                     return recipe.difficulty.includes('Сложно') || recipe.difficulty.includes('🧑‍🍳');
                 }
                 return true;
@@ -89,6 +91,23 @@ export default class RecipeModel {
         }
 
         return filteredRecipes;
+    }
+
+    #extractCuisineName(cuisineString) {
+        // Remove emoji flags and trim
+        return cuisineString.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽]/g, '').trim();
+    }
+
+    #extractTimeMinutes(timeString) {
+        if (timeString.includes('ч')) {
+            const hours = parseInt(timeString) || 0;
+            const minutesMatch = timeString.match(/(\d+)\s*мин/);
+            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+            return hours * 60 + minutes;
+        } else {
+            const minutesMatch = timeString.match(/(\d+)/);
+            return minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        }
     }
 
     // Observer pattern implementation
