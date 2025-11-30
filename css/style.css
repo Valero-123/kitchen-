@@ -1335,3 +1335,65 @@ footer {
         padding: 1rem 0;
     }
 }
+/* Стили для кнопки добавления рецепта в поисковой секции */
+.add-recipe-main-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1rem 1.5rem;
+    border-radius: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.add-recipe-main-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.add-recipe-main-btn .add-recipe-icon {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+/* Стили для кнопки очистки всех фильтров */
+.clear-all-filters-btn {
+    background: var(--surface-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    margin-top: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.clear-all-filters-btn:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+}
+
+/* Стили для удаления отдельных фильтров */
+.remove-filter {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+    padding: 2px 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+}
+
+.remove-filter:hover {
+    opacity: 1;
+    background: rgba(255,255,255,0.3);
+}
