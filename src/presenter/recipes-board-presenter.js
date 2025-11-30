@@ -111,7 +111,7 @@ export default class RecipesBoardPresenter {
             }
         });
 
-        const addRecipeBtn = this.#boardContainer.querySelector('.more-link');
+        const addRecipeBtn = this.#boardContainer.querySelector('.add-recipe-btn');
         if (addRecipeBtn) {
             addRecipeBtn.addEventListener('click', this.#handleAddRecipe.bind(this));
         }
@@ -273,28 +273,204 @@ export default class RecipesBoardPresenter {
     }
 
     #handleAddRecipe() {
-        const title = prompt('Введите название рецепта:');
-        if (title) {
-            const description = prompt('Введите описание рецепта:') || "Новый рецепт";
-            const time = prompt('Введите время приготовления:') || "30 мин";
-            const difficulty = prompt('Введите сложность:') || "👶 Начинающий";
-            const cuisine = prompt('Введите кухню:') || "🇷🇺 Русская";
-            const tags = prompt('Введите теги через запятую:') || "Новые";
+        this.#showAddRecipeForm();
+    }
+
+    #showAddRecipeForm() {
+        const modal = document.createElement('div');
+        modal.className = 'edit-modal';
+        
+        const form = document.createElement('div');
+        form.className = 'edit-form';
+        form.innerHTML = this.#createAddRecipeFormHTML();
+
+        modal.appendChild(form);
+        document.body.appendChild(modal);
+
+        this.#setupAddRecipeFormListeners(modal, form);
+    }
+
+    #createAddRecipeFormHTML() {
+        return `
+            <h2>Добавить новый рецепт</h2>
             
+            <div>
+                <label class="required-field">Название рецепта</label>
+                <input type="text" id="addTitle" placeholder="Введите название рецепта" required>
+            </div>
+
+            <div>
+                <label>Описание</label>
+                <textarea id="addDescription" placeholder="Опишите рецепт..."></textarea>
+            </div>
+
+            <div>
+                <label class="required-field">Время приготовления</label>
+                <input type="text" id="addTime" placeholder="Например: 30 мин" required>
+                <div class="form-hint">Примеры: 15 мин, 30 мин, 1 ч, 1 ч 30 мин</div>
+            </div>
+
+            <div>
+                <label class="required-field">Сложность</label>
+                <select id="addDifficulty" required>
+                    <option value="">Выберите сложность</option>
+                    <option value="👶 Начинающий">👶 Начинающий</option>
+                    <option value="👨‍🍳 Любитель">👨‍🍳 Любитель</option>
+                    <option value="🧑‍🍳 Профессионал">🧑‍🍳 Профессионал</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="required-field">Кухня</label>
+                <select id="addCuisine" required>
+                    <option value="">Выберите кухню</option>
+                    <option value="🇷🇺 Русская">🇷🇺 Русская</option>
+                    <option value="🇮🇹 Итальянская">🇮🇹 Итальянская</option>
+                    <option value="🇫🇷 Французская">🇫🇷 Французская</option>
+                    <option value="🇨🇳 Китайская">🇨🇳 Китайская</option>
+                    <option value="🇯🇵 Японская">🇯🇵 Японская</option>
+                    <option value="🇲🇽 Мексиканская">🇲🇽 Мексиканская</option>
+                    <option value="🇹🇭 Тайская">🇹🇭 Тайская</option>
+                    <option value="🇺🇸 Американская">🇺🇸 Американская</option>
+                    <option value="🇪🇸 Испанская">🇪🇸 Испанская</option>
+                    <option value="🇭🇺 Венгерская">🇭🇺 Венгерская</option>
+                    <option value="🇮🇱 Израильская">🇮🇱 Израильская</option>
+                    <option value="🇱🇧 Ливанская">🇱🇧 Ливанская</option>
+                    <option value="🇰🇷 Корейская">🇰🇷 Корейская</option>
+                    <option value="🇨🇺 Кубинская">🇨🇺 Кубинская</option>
+                    <option value="🇬🇷 Греческая">🇬🇷 Греческая</option>
+                    <option value="🇮🇳 Индийская">🇮🇳 Индийская</option>
+                    <option value="🇻🇳 Вьетнамская">🇻🇳 Вьетнамская</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="required-field">Тип блюда</label>
+                <select id="addCategory" required>
+                    <option value="">Выберите тип блюда</option>
+                    <option value="Закуски">🥗 Закуски</option>
+                    <option value="Супы">🍲 Супы</option>
+                    <option value="Основные">🍛 Основные блюда</option>
+                    <option value="Десерты">🍰 Десерты</option>
+                    <option value="Завтраки">🥞 Завтраки</option>
+                    <option value="Напитки">🍹 Напитки</option>
+                    <option value="Салаты">🥙 Салаты</option>
+                    <option value="Выпечка">🥖 Выпечка</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Теги (через запятую)</label>
+                <input type="text" id="addTags" placeholder="Например: Быстро, Вегетарианские, Здоровые">
+                <div class="form-hint">Необязательное поле. Теги помогут в поиске рецепта</div>
+            </div>
+
+            <div class="edit-button-group">
+                <button type="button" class="cancel-btn">Отмена</button>
+                <button type="button" class="save-btn">Добавить рецепт</button>
+            </div>
+        `;
+    }
+
+    #setupAddRecipeFormListeners(modal, form) {
+        const cancelBtn = form.querySelector('.cancel-btn');
+        const saveBtn = form.querySelector('.save-btn');
+
+        const closeModal = () => document.body.removeChild(modal);
+
+        cancelBtn.addEventListener('click', closeModal);
+
+        saveBtn.addEventListener('click', () => {
+            const title = form.querySelector('#addTitle').value.trim();
+            const description = form.querySelector('#addDescription').value.trim();
+            const time = form.querySelector('#addTime').value.trim();
+            const difficulty = form.querySelector('#addDifficulty').value;
+            const cuisine = form.querySelector('#addCuisine').value;
+            const category = form.querySelector('#addCategory').value;
+            const tagsInput = form.querySelector('#addTags').value.trim();
+
+            if (!title) {
+                alert('Название рецепта обязательно для заполнения!');
+                form.querySelector('#addTitle').focus();
+                return;
+            }
+
+            if (!time) {
+                alert('Время приготовления обязательно для заполнения!');
+                form.querySelector('#addTime').focus();
+                return;
+            }
+
+            if (!difficulty) {
+                alert('Выберите сложность рецепта!');
+                form.querySelector('#addDifficulty').focus();
+                return;
+            }
+
+            if (!cuisine) {
+                alert('Выберите кухню рецепта!');
+                form.querySelector('#addCuisine').focus();
+                return;
+            }
+
+            if (!category) {
+                alert('Выберите тип блюда!');
+                form.querySelector('#addCategory').focus();
+                return;
+            }
+
+            let difficultyLevel = 'medium';
+            if (difficulty.includes('Начинающий')) difficultyLevel = 'easy';
+            if (difficulty.includes('Профессионал')) difficultyLevel = 'hard';
+
+            let cookingTime = 'medium';
+            const timeMinutes = this.#extractTimeMinutes(time);
+            if (timeMinutes <= 20) cookingTime = 'fast';
+            else if (timeMinutes <= 30) cookingTime = 'short';
+            else if (timeMinutes > 60) cookingTime = 'long';
+
             const newRecipe = {
                 title,
-                time,
-                difficulty,
-                description,
-                tags: tags.split(',').map(tag => tag.trim()),
-                cuisine,
-                cookingTime: "medium",
-                difficultyLevel: "easy",
-                category: "Основные"
+                time: time,
+                difficulty: difficulty,
+                description: description || `${title} - вкусный и простой рецепт`,
+                tags: tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [category, 'Новые'],
+                cuisine: cuisine,
+                cookingTime: cookingTime,
+                difficultyLevel: difficultyLevel,
+                category: category
             };
             
             this.#recipeModel.addRecipe(newRecipe);
+            closeModal();
             alert(`Рецепт "${title}" успешно добавлен!`);
+        });
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', function closeOnEscape(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        });
+
+        form.querySelector('#addTitle').focus();
+    }
+
+    #extractTimeMinutes(timeString) {
+        if (!timeString) return 0;
+        
+        if (timeString.includes('ч')) {
+            const hours = parseInt(timeString) || 0;
+            const minutesMatch = timeString.match(/(\d+)\s*мин/);
+            const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+            return hours * 60 + minutes;
+        } else {
+            const minutesMatch = timeString.match(/(\d+)/);
+            return minutesMatch ? parseInt(minutesMatch[1]) : 0;
         }
     }
 
@@ -324,23 +500,23 @@ export default class RecipesBoardPresenter {
             <h2>Редактировать рецепт</h2>
             
             <div>
-                <label>Название рецепта:</label>
-                <input type="text" id="editTitle" value="${recipe.title}">
+                <label class="required-field">Название рецепта</label>
+                <input type="text" id="editTitle" value="${recipe.title}" required>
             </div>
 
             <div>
-                <label>Описание:</label>
+                <label>Описание</label>
                 <textarea id="editDescription">${recipe.description}</textarea>
             </div>
 
             <div>
-                <label>Время приготовления:</label>
-                <input type="text" id="editTime" value="${recipe.time}">
+                <label class="required-field">Время приготовления</label>
+                <input type="text" id="editTime" value="${recipe.time}" required>
             </div>
 
             <div>
-                <label>Сложность:</label>
-                <select id="editDifficulty">
+                <label class="required-field">Сложность</label>
+                <select id="editDifficulty" required>
                     <option value="👶 Начинающий" ${recipe.difficulty.includes('Начинающий') ? 'selected' : ''}>👶 Начинающий</option>
                     <option value="👨‍🍳 Любитель" ${recipe.difficulty.includes('Средне') ? 'selected' : ''}>👨‍🍳 Любитель</option>
                     <option value="🧑‍🍳 Профессионал" ${recipe.difficulty.includes('Сложно') ? 'selected' : ''}>🧑‍🍳 Профессионал</option>
@@ -348,21 +524,21 @@ export default class RecipesBoardPresenter {
             </div>
 
             <div>
-                <label>Кухня:</label>
-                <select id="editCuisine">
+                <label class="required-field">Кухня</label>
+                <select id="editCuisine" required>
                     ${this.#createCuisineOptions(recipe)}
                 </select>
             </div>
 
             <div>
-                <label>Тип блюда:</label>
-                <select id="editCategory">
+                <label class="required-field">Тип блюда</label>
+                <select id="editCategory" required>
                     ${this.#createCategoryOptions(recipe)}
                 </select>
             </div>
 
             <div>
-                <label>Теги (через запятую):</label>
+                <label>Теги (через запятую)</label>
                 <input type="text" id="editTags" value="${recipe.tags.join(', ')}">
             </div>
 

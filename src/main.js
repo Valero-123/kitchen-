@@ -53,7 +53,6 @@ class FlavorHubApp {
         const themeIcon = themeToggle.querySelector('.theme-icon');
         const themeText = themeToggle.querySelector('.theme-text');
 
-        // Check saved theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-theme');
@@ -107,7 +106,6 @@ class FlavorHubApp {
     }
 }
 
-// Initialize application when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     new FlavorHubApp();
 });
