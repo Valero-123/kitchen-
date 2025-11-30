@@ -1396,4 +1396,173 @@ footer {
 .remove-filter:hover {
     opacity: 1;
     background: rgba(255,255,255,0.3);
+
+}
+/* Стили для кнопки очистки всех фильтров */
+.clear-all-filters-btn {
+    background: var(--surface-light);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    padding: 0.8rem 1.5rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.clear-all-filters-btn:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.3);
+}
+
+.clear-all-filters-btn:active {
+    transform: translateY(0);
+}
+
+/* Иконка для кнопки очистки */
+.clear-all-filters-btn::before {
+    content: '🗑️';
+    font-size: 1rem;
+}
+
+/* Стили для активных фильтров контейнера */
+.active-filters {
+    background: var(--surface-light);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.active-filters-title {
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.active-filters-title::before {
+    content: '🎯';
+    font-size: 1.2rem;
+}
+
+.active-filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+}
+
+/* Стили для отдельных фильтров (чипсов) */
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--shadow-sm);
+}
+
+.filter-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.remove-filter {
+    margin-left: 0.8rem;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.9;
+    transition: all 0.3s ease;
+    padding: 2px 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+}
+
+.remove-filter:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    .active-filters {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .active-filters-list {
+        gap: 0.5rem;
+    }
+    
+    .filter-chip {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+    
+    .clear-all-filters-btn {
+        padding: 0.7rem 1.2rem;
+        font-size: 0.85rem;
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Анимация появления активных фильтров */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.active-filters {
+    animation: slideDown 0.3s ease-out;
+}
+
+/* Темная тема */
+body.dark-theme .active-filters {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+body.dark-theme .clear-all-filters-btn {
+    background: var(--surface-light);
+    color: var(--text-secondary);
+    border-color: var(--border);
+}
+
+body.dark-theme .clear-all-filters-btn:hover {
+    background: var(--error);
+    color: white;
+    border-color: var(--error);
 }
