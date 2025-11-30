@@ -3,6 +3,7 @@ console.log('🚀 FlavorHub app starting...');
 
 // Переменная для хранения рецептов
 let recipes = [];
+let currentFilters = {};
 
 // Проверяем загрузку DOM
 if (document.readyState === 'loading') {
@@ -251,6 +252,7 @@ function initRecipeBoard() {
         <div class="active-filters" id="activeFilters" style="display: none;">
             <div class="active-filters-title">Активные фильтры:</div>
             <div class="active-filters-list" id="activeFiltersList"></div>
+            <button class="clear-all-filters-btn" onclick="clearAllFilters()">Очистить все фильтры</button>
         </div>
 
         <div class="results-counter" id="resultsCounter"></div>
@@ -281,16 +283,29 @@ function renderRecipes() {
     
     if (!recipesContainer) return;
 
+    // Получаем отфильтрованные рецепты
+    const filteredRecipes = filterRecipes();
+    
+    console.log('🔍 Filtering recipes:', {
+        filters: currentFilters,
+        total: recipes.length,
+        filtered: filteredRecipes.length
+    });
+
     // Очищаем контейнер
     recipesContainer.innerHTML = '';
 
     // Обновляем счетчик результатов
     if (resultsCounter) {
-        resultsCounter.textContent = `Найдено рецептов: ${recipes.length}`;
+        const totalRecipes = recipes.length;
+        const showingRecipes = filteredRecipes.length;
+        resultsCounter.textContent = showingRecipes === totalRecipes 
+            ? `Найдено все рецепты: ${showingRecipes}`
+            : `Найдено рецептов: ${showingRecipes} из ${totalRecipes}`;
     }
 
     // Если рецептов нет - показываем пустое состояние
-    if (recipes.length === 0) {
+    if (filteredRecipes.length === 0) {
         recipesContainer.innerHTML = `
             <div class="empty-state">
                 <div class="empty-icon">🍳</div>
@@ -301,13 +316,75 @@ function renderRecipes() {
         return;
     }
 
-    // Рендерим все рецепты
-    recipes.forEach(recipe => {
+    // Рендерим отфильтрованные рецепты
+    filteredRecipes.forEach(recipe => {
         const recipeCardHTML = createRecipeCardHTML(recipe);
         recipesContainer.insertAdjacentHTML('beforeend', recipeCardHTML);
     });
 
-    console.log(`✅ Rendered ${recipes.length} recipes`);
+    console.log(`✅ Rendered ${filteredRecipes.length} recipes`);
+}
+
+function filterRecipes() {
+    let filteredRecipes = [...recipes];
+
+    // Фильтр по кухне
+    if (currentFilters.cuisine && currentFilters.cuisine !== '') {
+        filteredRecipes = filteredRecipes.filter(recipe => 
+            recipe.cuisine === currentFilters.cuisine
+        );
+        console.log(`🔍 After cuisine filter (${currentFilters.cuisine}):`, filteredRecipes.length);
+    }
+
+    // Фильтр по времени приготовления
+    if (currentFilters.time && currentFilters.time !== '') {
+        filteredRecipes = filteredRecipes.filter(recipe => {
+            const timeValue = currentFilters.time;
+            switch (timeValue) {
+                case 'fast':
+                    return recipe.cookingTime === 'short' || (parseInt(recipe.time) <= 20);
+                case 'short':
+                    return recipe.cookingTime === 'short' || (parseInt(recipe.time) <= 30);
+                case 'medium':
+                    return recipe.cookingTime === 'medium' || (parseInt(recipe.time) > 30 && parseInt(recipe.time) <= 60);
+                case 'long':
+                    return recipe.cookingTime === 'long' || (parseInt(recipe.time) > 60);
+                default:
+                    return true;
+            }
+        });
+        console.log(`🔍 After time filter (${currentFilters.time}):`, filteredRecipes.length);
+    }
+
+    // Фильтр по сложности
+    if (currentFilters.difficulty && currentFilters.difficulty !== '') {
+        filteredRecipes = filteredRecipes.filter(recipe => 
+            recipe.difficultyLevel === currentFilters.difficulty
+        );
+        console.log(`🔍 After difficulty filter (${currentFilters.difficulty}):`, filteredRecipes.length);
+    }
+
+    // Фильтр по категории
+    if (currentFilters.category && currentFilters.category !== '') {
+        filteredRecipes = filteredRecipes.filter(recipe => 
+            recipe.category === currentFilters.category || 
+            recipe.tags.includes(currentFilters.category)
+        );
+        console.log(`🔍 After category filter (${currentFilters.category}):`, filteredRecipes.length);
+    }
+
+    // Фильтр по поиску
+    if (currentFilters.search && currentFilters.search.trim() !== '') {
+        const searchTerm = currentFilters.search.toLowerCase().trim();
+        filteredRecipes = filteredRecipes.filter(recipe => 
+            recipe.title.toLowerCase().includes(searchTerm) ||
+            recipe.description.toLowerCase().includes(searchTerm) ||
+            recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+        );
+        console.log(`🔍 After search filter (${currentFilters.search}):`, filteredRecipes.length);
+    }
+
+    return filteredRecipes;
 }
 
 function createRecipeCardHTML(recipe) {
@@ -335,6 +412,8 @@ function createRecipeCardHTML(recipe) {
 }
 
 function setupRecipeBoardEvents() {
+    console.log('🔍 Setting up event listeners...');
+
     // Обработчик кнопки добавления рецепта в поисковой секции
     const addButton = document.querySelector('.add-recipe-main-btn');
     if (addButton) {
@@ -353,16 +432,38 @@ function setupRecipeBoardEvents() {
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') performSearch();
         });
+        
+        // Очистка поиска при изменении
+        searchInput.addEventListener('input', () => {
+            if (searchInput.value.trim() === '') {
+                delete currentFilters.search;
+                renderRecipes();
+                updateActiveFilters();
+            }
+        });
     }
 
     // Обработчики фильтров
-    const filters = ['cuisineFilter', 'timeFilter', 'difficultyFilter', 'categoryFilter'];
-    filters.forEach(filterId => {
-        const filter = document.getElementById(filterId);
+    const filters = [
+        { id: 'cuisineFilter', key: 'cuisine' },
+        { id: 'timeFilter', key: 'time' },
+        { id: 'difficultyFilter', key: 'difficulty' },
+        { id: 'categoryFilter', key: 'category' }
+    ];
+
+    filters.forEach(({ id, key }) => {
+        const filter = document.getElementById(id);
         if (filter) {
-            filter.addEventListener('change', updateActiveFilters);
+            filter.addEventListener('change', () => {
+                currentFilters[key] = filter.value;
+                console.log(`🔍 Filter changed: ${key} = ${filter.value}`);
+                renderRecipes(); // ВАЖНО: перерисовываем рецепты при изменении фильтра
+                updateActiveFilters();
+            });
         }
     });
+
+    console.log('✅ All event listeners set up');
 }
 
 function showAddRecipeForm() {
@@ -512,6 +613,18 @@ window.saveNewRecipe = function() {
         return;
     }
 
+    // Определяем уровень сложности
+    let difficultyLevel = 'medium';
+    if (difficulty.includes('Начинающий')) difficultyLevel = 'easy';
+    if (difficulty.includes('Профессионал')) difficultyLevel = 'hard';
+
+    // Определяем время приготовления
+    let cookingTime = 'medium';
+    const timeMinutes = extractTimeMinutes(time);
+    if (timeMinutes <= 20) cookingTime = 'fast';
+    else if (timeMinutes <= 30) cookingTime = 'short';
+    else if (timeMinutes > 60) cookingTime = 'long';
+
     // Обработка тегов
     const tags = tagsInput ? tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag !== '') : [category];
 
@@ -527,8 +640,8 @@ window.saveNewRecipe = function() {
         tags,
         rating: "4.5",
         badge: "Новый",
-        cookingTime: "medium",
-        difficultyLevel: "medium"
+        cookingTime: cookingTime,
+        difficultyLevel: difficultyLevel
     };
 
     // Добавляем рецепт в массив
@@ -542,6 +655,21 @@ window.saveNewRecipe = function() {
     
     // Перерисовываем рецепты
     renderRecipes();
+    updateActiveFilters();
+}
+
+function extractTimeMinutes(timeString) {
+    if (!timeString) return 0;
+    
+    if (timeString.includes('ч')) {
+        const hours = parseInt(timeString) || 0;
+        const minutesMatch = timeString.match(/(\d+)\s*мин/);
+        const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+        return hours * 60 + minutes;
+    } else {
+        const minutesMatch = timeString.match(/(\d+)/);
+        return minutesMatch ? parseInt(minutesMatch[1]) : 0;
+    }
 }
 
 // Функции для кнопок в карточке рецепта
@@ -562,6 +690,7 @@ window.deleteRecipe = function(recipeId) {
         
         // Перерисовываем рецепты
         renderRecipes();
+        updateActiveFilters();
         
         alert(`Рецепт "${recipe.title}" удален!`);
     }
@@ -572,76 +701,118 @@ function performSearch() {
     if (searchInput) {
         const searchTerm = searchInput.value.trim();
         if (searchTerm) {
-            // Фильтруем рецепты по поисковому запросу
-            const filteredRecipes = recipes.filter(recipe => 
-                recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-            );
-            
-            // Временно показываем результаты
-            const recipesContainer = document.getElementById('recipesContainer');
-            const resultsCounter = document.getElementById('resultsCounter');
-            
-            if (recipesContainer) {
-                recipesContainer.innerHTML = '';
-                
-                if (filteredRecipes.length === 0) {
-                    recipesContainer.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">🔍</div>
-                            <h3>По запросу "${searchTerm}" ничего не найдено</h3>
-                            <p>Попробуйте изменить поисковый запрос</p>
-                        </div>
-                    `;
-                } else {
-                    filteredRecipes.forEach(recipe => {
-                        const recipeCardHTML = createRecipeCardHTML(recipe);
-                        recipesContainer.insertAdjacentHTML('beforeend', recipeCardHTML);
-                    });
-                }
-                
-                if (resultsCounter) {
-                    resultsCounter.textContent = `Найдено рецептов: ${filteredRecipes.length}`;
-                }
-            }
-        } else {
-            // Если поиск пустой, показываем все рецепты
+            currentFilters.search = searchTerm;
             renderRecipes();
+            updateActiveFilters();
+        } else {
+            delete currentFilters.search;
+            renderRecipes();
+            updateActiveFilters();
         }
     }
 }
 
 function updateActiveFilters() {
-    const activeFilters = [];
-    
-    // Проверяем каждый фильтр
-    const filters = [
-        { id: 'cuisineFilter', name: 'Кухня' },
-        { id: 'timeFilter', name: 'Время' },
-        { id: 'difficultyFilter', name: 'Сложность' },
-        { id: 'categoryFilter', name: 'Тип блюда' }
-    ];
-
-    filters.forEach(filter => {
-        const element = document.getElementById(filter.id);
-        if (element && element.value) {
-            activeFilters.push(`${filter.name}: ${element.options[element.selectedIndex].text}`);
-        }
-    });
-
-    // Показываем/скрываем блок активных фильтров
     const activeFiltersContainer = document.getElementById('activeFilters');
     const activeFiltersList = document.getElementById('activeFiltersList');
     
-    if (activeFilters.length > 0) {
-        activeFiltersContainer.style.display = 'block';
-        activeFiltersList.innerHTML = activeFilters.map(filter => 
-            `<div class="filter-chip">${filter}</div>`
-        ).join('');
-    } else {
+    if (!activeFiltersContainer || !activeFiltersList) return;
+
+    const activeFilters = Object.entries(currentFilters)
+        .filter(([key, value]) => value && value !== '');
+
+    if (activeFilters.length === 0) {
         activeFiltersContainer.style.display = 'none';
+        return;
     }
+
+    activeFiltersContainer.style.display = 'block';
+    activeFiltersList.innerHTML = '';
+
+    activeFilters.forEach(([key, value]) => {
+        const filterChip = document.createElement('div');
+        filterChip.className = 'filter-chip';
+        
+        const filterName = getFilterDisplayName(key, value);
+        filterChip.innerHTML = `
+            ${filterName}
+            <span class="remove-filter" onclick="removeFilter('${key}')">×</span>
+        `;
+
+        activeFiltersList.appendChild(filterChip);
+    });
+}
+
+function getFilterDisplayName(key, value) {
+    const displayNames = {
+        cuisine: `🌍 ${value.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇬🇷🇮🇳🇻🇳🇪🇸]/g, '').trim()}`,
+        time: `⏱️ ${getTimeDisplayName(value)}`,
+        difficulty: `📊 ${getDifficultyDisplayName(value)}`,
+        category: `🍽️ ${value}`,
+        search: `🔍 "${value}"`
+    };
+
+    return displayNames[key] || `${key}: ${value}`;
+}
+
+function getTimeDisplayName(timeKey) {
+    const timeNames = {
+        'fast': 'До 20 мин',
+        'short': 'До 30 мин',
+        'medium': 'До 1 часа',
+        'long': 'Более 1 часа'
+    };
+    return timeNames[timeKey] || timeKey;
+}
+
+function getDifficultyDisplayName(difficultyKey) {
+    const difficultyNames = {
+        'easy': 'Начинающий',
+        'medium': 'Любитель',
+        'hard': 'Профессионал'
+    };
+    return difficultyNames[difficultyKey] || difficultyKey;
+}
+
+window.removeFilter = function(filterKey) {
+    delete currentFilters[filterKey];
+    
+    // Сбрасываем соответствующий элемент формы
+    const filterInputs = {
+        cuisine: '#cuisineFilter',
+        time: '#timeFilter',
+        difficulty: '#difficultyFilter',
+        category: '#categoryFilter',
+        search: '.search-input'
+    };
+
+    if (filterInputs[filterKey]) {
+        const input = document.querySelector(filterInputs[filterKey]);
+        if (input) {
+            if (filterKey === 'search') {
+                input.value = '';
+            } else {
+                input.selectedIndex = 0;
+            }
+        }
+    }
+
+    renderRecipes();
+    updateActiveFilters();
+}
+
+window.clearAllFilters = function() {
+    currentFilters = {};
+    
+    // Сбрасываем все элементы формы
+    const searchInput = document.querySelector('.search-input');
+    const selects = document.querySelectorAll('select');
+    
+    if (searchInput) searchInput.value = '';
+    selects.forEach(select => select.selectedIndex = 0);
+
+    renderRecipes();
+    updateActiveFilters();
 }
 
 function initSubscriptionForm() {
