@@ -20,14 +20,24 @@ export default class RecipesBoardPresenter {
     }
 
     init() {
+        console.log('🔍 Starting board presenter initialization...');
         this.#renderBoard();
+        console.log('✅ Board presenter initialized successfully');
     }
 
     #renderBoard() {
+        console.log('🔍 Rendering board components...');
+        
+        // Очищаем контейнер
         this.#boardContainer.innerHTML = '';
         
+        // Рендерим компоненты
         render(this.#formAddRecipeComponent, this.#boardContainer);
         render(this.#recipeListComponent, this.#boardContainer);
+        
+        console.log('✅ Board components rendered');
+        
+        // Рендерим рецепты и настраиваем обработчики
         this.#renderRecipes();
         this.#setupEventListeners();
     }
@@ -36,38 +46,55 @@ export default class RecipesBoardPresenter {
         const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
         
         if (!recipesContainer) {
+            console.error('❌ Recipes container not found!');
             return;
         }
         
+        // Очищаем контейнер
         recipesContainer.innerHTML = '';
 
+        // Получаем отфильтрованные рецепты
         const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentFilters);
 
+        console.log(`🔍 Found ${filteredRecipes.length} recipes`);
+
+        // Обновляем UI
         this.#updateActiveFiltersDisplay();
         this.#updateResultsCounter(filteredRecipes.length);
 
+        // Если рецептов нет - показываем пустое состояние
         if (filteredRecipes.length === 0) {
+            console.log('🔍 No recipes found, showing empty state');
             const emptyComponent = new EmptyComponent();
             render(emptyComponent, recipesContainer);
             return;
         }
 
+        // Рендерим рецепты
         filteredRecipes.forEach(recipe => {
             const recipeComponent = new RecipeComponent(recipe);
             render(recipeComponent, recipesContainer);
         });
 
+        console.log(`✅ Rendered ${filteredRecipes.length} recipes`);
+        
+        // Настраиваем обработчики для рецептов
         this.#setupRecipeEventListeners();
     }
 
     #setupEventListeners() {
+        console.log('🔍 Setting up event listeners...');
+        
         const searchInput = this.#boardContainer.querySelector('.search-input');
         const searchBtn = this.#boardContainer.querySelector('.search-btn');
         const clearFiltersBtn = this.#boardContainer.querySelector('.clear-filters-btn');
+        const addRecipeBtn = this.#boardContainer.querySelector('.add-recipe-btn');
 
+        // Поиск
         if (searchInput && searchBtn) {
             const performSearch = () => {
                 this.#currentFilters.search = searchInput.value.trim();
+                console.log('🔍 Performing search:', this.#currentFilters.search);
                 this.#renderRecipes();
             };
 
@@ -84,14 +111,20 @@ export default class RecipesBoardPresenter {
                     this.#renderRecipes();
                 }
             });
+            
+            console.log('✅ Search listeners added');
         }
 
+        // Очистка фильтров
         if (clearFiltersBtn) {
             clearFiltersBtn.addEventListener('click', () => {
+                console.log('🗑️ Clearing all filters');
                 this.#clearAllFilters();
             });
+            console.log('✅ Clear filters listener added');
         }
 
+        // Фильтры
         const filters = [
             { id: 'cuisineFilter', key: 'cuisine' },
             { id: 'timeFilter', key: 'time' },
@@ -106,15 +139,57 @@ export default class RecipesBoardPresenter {
             if (filter) {
                 filter.addEventListener('change', () => {
                     this.#currentFilters[key] = filter.value;
+                    console.log(`🔍 Filter changed: ${key} = ${filter.value}`);
                     this.#renderRecipes();
                 });
             }
         });
 
-        const addRecipeBtn = this.#boardContainer.querySelector('.add-recipe-btn');
+        // Кнопка добавления рецепта
         if (addRecipeBtn) {
-            addRecipeBtn.addEventListener('click', this.#handleAddRecipe.bind(this));
+            addRecipeBtn.addEventListener('click', () => {
+                console.log('➕ Add recipe button clicked');
+                this.#handleAddRecipe();
+            });
+            console.log('✅ Add recipe button listener added');
+        } else {
+            console.error('❌ Add recipe button not found!');
+            // Создаем кнопку, если её нет
+            this.#createFallbackAddButton();
         }
+
+        console.log('✅ All event listeners set up');
+    }
+
+    #createFallbackAddButton() {
+        console.log('🔍 Creating fallback add button...');
+        const addRecipeSection = document.createElement('div');
+        addRecipeSection.className = 'add-recipe-section';
+        
+        const addRecipeBtn = document.createElement('button');
+        addRecipeBtn.className = 'add-recipe-btn';
+        addRecipeBtn.type = 'button';
+        addRecipeBtn.innerHTML = `
+            <span class="add-recipe-icon">+</span>
+            Добавить новый рецепт
+        `;
+        
+        addRecipeBtn.addEventListener('click', () => {
+            console.log('➕ Fallback add recipe button clicked');
+            this.#handleAddRecipe();
+        });
+        
+        addRecipeSection.appendChild(addRecipeBtn);
+        
+        // Добавляем перед recipes container
+        const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
+        if (recipesContainer) {
+            recipesContainer.parentNode.insertBefore(addRecipeSection, recipesContainer);
+        } else {
+            this.#boardContainer.appendChild(addRecipeSection);
+        }
+        
+        console.log('✅ Fallback add button created');
     }
 
     #clearAllFilters() {
@@ -138,6 +213,7 @@ export default class RecipesBoardPresenter {
         this.#renderRecipes();
     }
 
+    // Остальные методы остаются без изменений...
     #updateActiveFiltersDisplay() {
         const activeFiltersContainer = this.#boardContainer.querySelector('#activeFilters');
         const activeFiltersList = this.#boardContainer.querySelector('#activeFiltersList');

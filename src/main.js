@@ -1,6 +1,54 @@
 // main.js
 console.log('🚀 FlavorHub app starting...');
 
+// Начальные рецепты
+const initialRecipes = [
+    {
+        id: '1',
+        title: "Карбонара",
+        time: "20 мин",
+        difficulty: "👨‍🍳 Любитель",
+        rating: "4.7",
+        description: "Классическая итальянская паста с хрустящим беконом, сыром пармезан и сливочным соусом на основе яичных желтков.",
+        tags: ["Паста", "Итальянская", "Сытные", "Бекон"],
+        badge: "Классика",
+        cuisine: "🇮🇹 Итальянская",
+        cookingTime: "short",
+        difficultyLevel: "medium",
+        category: "Основные"
+    },
+    {
+        id: '2',
+        title: "Окрошка",
+        time: "25 мин",
+        difficulty: "👶 Начинающий",
+        rating: "4.3",
+        description: "Освежающий холодный суп на квасе с отварным мясом, свежими овощами и зеленью. Идеален для жаркого лета.",
+        tags: ["Супы", "Русская", "Лето", "Охлаждающие"],
+        badge: "Лето",
+        cuisine: "🇷🇺 Русская",
+        cookingTime: "short",
+        difficultyLevel: "easy",
+        category: "Супы"
+    },
+    {
+        id: '3',
+        title: "Сырники",
+        time: "30 мин",
+        difficulty: "👶 Начинающий",
+        rating: "4.4",
+        description: "Нежные творожные оладьи с золотистой корочкой. Подаются со сметаной, вареньем или свежими ягодами.",
+        tags: ["Завтраки", "Русская", "Творог", "Сладкое"],
+        badge: "Завтрак",
+        cuisine: "🇷🇺 Русская",
+        cookingTime: "short",
+        difficultyLevel: "easy",
+        category: "Завтраки"
+    }
+];
+
+let recipes = [...initialRecipes];
+
 // Проверяем загрузку DOM
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
@@ -110,7 +158,7 @@ function initRecipeBoard() {
         <div class="search-section">
             <input type="text" class="search-input" placeholder="🔍 Поиск рецептов по названию, ингредиентам...">
             <button class="search-btn" type="button">Найти</button>
-            <!-- ЗАМЕНИЛИ КНОПКУ ОЧИСТКИ ФИЛЬТРОВ НА КНОПКУ ДОБАВЛЕНИЯ -->
+            <!-- КНОПКА ДОБАВЛЕНИЯ РЕЦЕПТА -->
             <button class="add-recipe-main-btn" type="button">
                 <span class="add-recipe-icon">+</span>
                 Добавить рецепт
@@ -135,7 +183,7 @@ function initRecipeBoard() {
                 <div class="filter-title">⏱️ ВРЕМЯ ПРИГОТОВЛЕНИЯ</div>
                 <select class="dropdown" id="timeFilter">
                     <option value="">Любое время</option>
-                    <option value="fast">🚀 Быстро (до 20 мин)</option>
+                    <option value="short">🚀 Быстро (до 20 мин)</option>
                     <option value="short">⚡ До 30 минут</option>
                     <option value="medium">🕐 До 1 часа</option>
                     <option value="long">⏳ Более 1 часа</option>
@@ -170,23 +218,82 @@ function initRecipeBoard() {
             <div class="active-filters-list" id="activeFiltersList"></div>
         </div>
 
+        <div class="results-counter" id="resultsCounter"></div>
+
         <div class="popular-section">
             <h2 class="section-title">🔥 ПОПУЛЯРНЫЕ РЕЦЕПТЫ</h2>
             <div class="popular-grid" id="recipesContainer">
                 <!-- Рецепты будут здесь -->
-                <div class="empty-state">
-                    <div class="empty-icon">🍳</div>
-                    <h3>Рецепты не найдены</h3>
-                    <p>Попробуйте изменить параметры поиска или добавьте новый рецепт</p>
-                </div>
             </div>
         </div>
     `;
 
+    // Рендерим начальные рецепты
+    renderRecipes();
+    
     // Настраиваем обработчики событий
     setupRecipeBoardEvents();
     
     console.log('✅ Recipe board initialized');
+}
+
+function renderRecipes() {
+    const recipesContainer = document.getElementById('recipesContainer');
+    const resultsCounter = document.getElementById('resultsCounter');
+    
+    if (!recipesContainer) return;
+
+    // Очищаем контейнер
+    recipesContainer.innerHTML = '';
+
+    // Обновляем счетчик результатов
+    if (resultsCounter) {
+        resultsCounter.textContent = `Найдено рецептов: ${recipes.length}`;
+    }
+
+    // Если рецептов нет - показываем пустое состояние
+    if (recipes.length === 0) {
+        recipesContainer.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">🍳</div>
+                <h3>Рецепты не найдены</h3>
+                <p>Попробуйте изменить параметры поиска или добавьте новый рецепт</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Рендерим все рецепты
+    recipes.forEach(recipe => {
+        const recipeCardHTML = createRecipeCardHTML(recipe);
+        recipesContainer.insertAdjacentHTML('beforeend', recipeCardHTML);
+    });
+
+    console.log(`✅ Rendered ${recipes.length} recipes`);
+}
+
+function createRecipeCardHTML(recipe) {
+    return `
+        <div class="popular-card" data-recipe-id="${recipe.id}">
+            ${recipe.badge ? `<div class="card-badge">${recipe.badge}</div>` : ''}
+            <div class="card-content">
+                <h3 class="card-title">${recipe.title}</h3>
+                <div class="card-meta">
+                    <span class="meta-item">⏱️ ${recipe.time}</span>
+                    <span class="meta-item">${recipe.difficulty}</span>
+                    <span class="meta-item">⭐ ${recipe.rating}</span>
+                </div>
+                <p class="card-description">${recipe.description}</p>
+                <div class="card-tags">
+                    ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                </div>
+                <div class="card-btn">
+                    <button class="change" onclick="editRecipe('${recipe.id}')">📝 Редактировать</button>
+                    <button class="delete" onclick="deleteRecipe('${recipe.id}')">🗑️ Удалить</button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 function setupRecipeBoardEvents() {
@@ -365,6 +472,7 @@ window.saveNewRecipe = function() {
 
     // Создаем новый рецепт
     const newRecipe = {
+        id: Date.now().toString(), // Генерируем уникальный ID
         title,
         description: description || `${title} - вкусный и простой рецепт`,
         time,
@@ -373,67 +481,44 @@ window.saveNewRecipe = function() {
         category,
         tags,
         rating: "4.5",
-        badge: "Новый"
+        badge: "Новый",
+        cookingTime: "medium",
+        difficultyLevel: "medium"
     };
 
-    // Здесь можно добавить логику сохранения рецепта
-    console.log('📝 New recipe data:', newRecipe);
+    // Добавляем рецепт в массив
+    recipes.unshift(newRecipe); // Добавляем в начало
     
     // Показываем уведомление
-    alert(`Рецепт "${title}" успешно добавлен!\n\nДетали:\n• Время: ${time}\n• Сложность: ${difficulty}\n• Кухня: ${cuisine}\n• Тип: ${category}\n• Теги: ${tags.join(', ')}`);
+    alert(`Рецепт "${title}" успешно добавлен!`);
     
     // Закрываем форму
     closeAddRecipeForm();
     
-    // Можно добавить рецепт в список на странице
-    addRecipeToDisplay(newRecipe);
-}
-
-function addRecipeToDisplay(recipe) {
-    const recipesContainer = document.getElementById('recipesContainer');
-    if (!recipesContainer) return;
-
-    // Убираем пустое состояние если оно есть
-    const emptyState = recipesContainer.querySelector('.empty-state');
-    if (emptyState) {
-        emptyState.remove();
-    }
-
-    // Создаем карточку рецепта
-    const recipeCardHTML = `
-        <div class="popular-card">
-            <div class="card-badge">${recipe.badge}</div>
-            <div class="card-content">
-                <h3 class="card-title">${recipe.title}</h3>
-                <div class="card-meta">
-                    <span class="meta-item">⏱️ ${recipe.time}</span>
-                    <span class="meta-item">${recipe.difficulty}</span>
-                    <span class="meta-item">⭐ ${recipe.rating}</span>
-                </div>
-                <p class="card-description">${recipe.description}</p>
-                <div class="card-tags">
-                    ${recipe.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                </div>
-                <div class="card-btn">
-                    <button class="change" onclick="editRecipe('${recipe.title}')">📝 Редактировать</button>
-                    <button class="delete" onclick="deleteRecipe('${recipe.title}')">🗑️ Удалить</button>
-                </div>
-            </div>
-        </div>
-    `;
-
-    recipesContainer.insertAdjacentHTML('afterbegin', recipeCardHTML);
+    // Перерисовываем рецепты
+    renderRecipes();
 }
 
 // Функции для кнопок в карточке рецепта
-window.editRecipe = function(recipeTitle) {
-    alert(`Редактирование рецепта: ${recipeTitle}\n\nЭта функция находится в разработке.`);
+window.editRecipe = function(recipeId) {
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (recipe) {
+        alert(`Редактирование рецепта: ${recipe.title}\n\nЭта функция находится в разработке.`);
+    }
 }
 
-window.deleteRecipe = function(recipeTitle) {
-    if (confirm(`Вы уверены, что хотите удалить рецепт "${recipeTitle}"?`)) {
-        alert(`Рецепт "${recipeTitle}" удален!`);
-        // Здесь можно добавить логику удаления из DOM
+window.deleteRecipe = function(recipeId) {
+    const recipe = recipes.find(r => r.id === recipeId);
+    if (!recipe) return;
+
+    if (confirm(`Вы уверены, что хотите удалить рецепт "${recipe.title}"?`)) {
+        // Удаляем рецепт из массива
+        recipes = recipes.filter(r => r.id !== recipeId);
+        
+        // Перерисовываем рецепты
+        renderRecipes();
+        
+        alert(`Рецепт "${recipe.title}" удален!`);
     }
 }
 
@@ -442,10 +527,42 @@ function performSearch() {
     if (searchInput) {
         const searchTerm = searchInput.value.trim();
         if (searchTerm) {
-            alert(`Выполняется поиск: "${searchTerm}"`);
-            // Здесь можно добавить логику поиска
+            // Фильтруем рецепты по поисковому запросу
+            const filteredRecipes = recipes.filter(recipe => 
+                recipe.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                recipe.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+            );
+            
+            // Временно показываем результаты
+            const recipesContainer = document.getElementById('recipesContainer');
+            const resultsCounter = document.getElementById('resultsCounter');
+            
+            if (recipesContainer) {
+                recipesContainer.innerHTML = '';
+                
+                if (filteredRecipes.length === 0) {
+                    recipesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">🔍</div>
+                            <h3>По запросу "${searchTerm}" ничего не найдено</h3>
+                            <p>Попробуйте изменить поисковый запрос</p>
+                        </div>
+                    `;
+                } else {
+                    filteredRecipes.forEach(recipe => {
+                        const recipeCardHTML = createRecipeCardHTML(recipe);
+                        recipesContainer.insertAdjacentHTML('beforeend', recipeCardHTML);
+                    });
+                }
+                
+                if (resultsCounter) {
+                    resultsCounter.textContent = `Найдено рецептов: ${filteredRecipes.length}`;
+                }
+            }
         } else {
-            alert('Введите поисковый запрос');
+            // Если поиск пустой, показываем все рецепты
+            renderRecipes();
         }
     }
 }
