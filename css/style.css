@@ -1226,3 +1226,112 @@ footer {
     content: ' *';
     color: var(--error);
 }
+/* Add Recipe Button Styles */
+.add-recipe-section {
+    text-align: center;
+    margin: 3rem 0;
+    padding: 2rem 0;
+}
+
+.add-recipe-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1.5rem 3rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.add-recipe-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.add-recipe-btn:hover::before {
+    left: 100%;
+}
+
+.add-recipe-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+}
+
+.add-recipe-icon {
+    font-size: 1.5rem;
+    font-weight: 800;
+    transition: transform 0.3s ease;
+}
+
+.add-recipe-btn:hover .add-recipe-icon {
+    transform: rotate(90deg) scale(1.2);
+}
+
+/* Required field indicators */
+.edit-form input:required,
+.edit-form select:required {
+    border-left: 4px solid var(--primary);
+}
+
+.edit-form input:invalid:not(:focus),
+.edit-form select:invalid:not(:focus) {
+    border-color: var(--error);
+}
+
+/* Form validation styles */
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.required-field::after {
+    content: ' *';
+    color: var(--error);
+}
+
+/* Loading state for add button */
+.add-recipe-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.add-recipe-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+@media (max-width: 768px) {
+    .add-recipe-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+        padding: 1.2rem 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .add-recipe-section {
+        margin: 2rem 0;
+        padding: 1rem 0;
+    }
+}

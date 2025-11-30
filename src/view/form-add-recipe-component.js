@@ -103,7 +103,12 @@ function createFormAddRecipeComponentTemplate() {
         <div class="active-filters-list" id="activeFiltersList"></div>
     </div>
 
-    <button class="add-recipe-btn" type="button">+ Добавить новый рецепт</button>
+    <div class="add-recipe-section">
+        <button class="add-recipe-btn" type="button">
+            <span class="add-recipe-icon">+</span>
+            Добавить новый рецепт
+        </button>
+    </div>
     `;
 }
 

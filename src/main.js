@@ -1,4 +1,5 @@
 import HeaderComponent from './view/header-component.js';
+import FormAddRecipeComponent from './view/form-add-recipe-component.js';
 import RecipesBoardPresenter from './presenter/recipes-board-presenter.js';
 import RecipeModel from './model/recipe-model.js';
 import { render, RenderPosition } from './framework/render.js';
