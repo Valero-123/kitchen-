@@ -18,8 +18,8 @@ function createRecipeComponentTemplate(recipe) {
           ${tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
         </div>
         <div class="card-btn">
-          <button class="change">📝 Редактировать</button>
-          <button class="delete">🗑️ Удалить</button>
+          <button class="change" type="button">📝 Редактировать</button>
+          <button class="delete" type="button">🗑️ Удалить</button>
         </div>
       </div>
     </div>
@@ -32,7 +32,7 @@ export default class RecipeComponent extends AbstractComponent {
     this.recipe = recipe;
   }
 
-  get template() {
+  getTemplate() {
     return createRecipeComponentTemplate(this.recipe);
   }
 }

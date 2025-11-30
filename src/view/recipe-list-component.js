@@ -12,7 +12,7 @@ function createRecipeListComponentTemplate() {
 }
 
 export default class RecipeListComponent extends AbstractComponent {
-  get template() {
+  getTemplate() {
     return createRecipeListComponentTemplate();
   }
 }

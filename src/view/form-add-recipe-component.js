@@ -4,7 +4,7 @@ function createFormAddRecipeComponentTemplate() {
   return `
     <div class="search-section">
       <input type="text" class="search-input" placeholder="🔍 Поиск рецептов...">
-      <button class="search-btn">Найти</button>
+      <button class="search-btn" type="button">Найти</button>
     </div>
     <div class="filters">
       <div class="filter-section">
@@ -40,12 +40,12 @@ function createFormAddRecipeComponentTemplate() {
         </select>
       </div>
     </div>
-    <button class="more-link">+ Добавить новый рецепт</button>
+    <button class="more-link" type="button">+ Добавить новый рецепт</button>
   `;
 }
 
 export default class FormAddRecipeComponent extends AbstractComponent {
-  get template() {
+  getTemplate() {
     return createFormAddRecipeComponentTemplate();
   }
 }

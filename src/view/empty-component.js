@@ -11,7 +11,7 @@ function createEmptyComponentTemplate() {
 }
 
 export default class EmptyComponent extends AbstractComponent {
-  get template() {
+  getTemplate() {
     return createEmptyComponentTemplate();
   }
 }
