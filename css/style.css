@@ -89,7 +89,7 @@ header .container {
     align-items: center;
 }
 
-/* New Logo Styles */
+/* Logo Styles */
 .logo {
     font-size: 2.5rem;
     font-weight: 800;
@@ -103,7 +103,6 @@ header .container {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
     letter-spacing: 2px;
-    font-feature-settings: 'ss02' on, 'salt' on;
 }
 
 .logo::before {
@@ -142,33 +141,6 @@ header .container {
 .logo:hover::after {
     transform: rotate(15deg) scale(1.2);
     filter: grayscale(0);
-}
-
-/* Cooking-themed logo variant */
-.logo-cooking {
-    position: relative;
-    display: inline-block;
-}
-
-.logo-cooking::before {
-    content: '👨‍🍳';
-    position: absolute;
-    top: -8px;
-    right: -15px;
-    font-size: 1.2rem;
-    background: var(--gradient-accent);
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px) rotate(0deg); }
-    50% { transform: translateY(-5px) rotate(10deg); }
 }
 
 .nav-menu {
@@ -279,82 +251,44 @@ header .container {
     }
 }
 
-/* Filters Section */
-.filters {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin: 3rem 0;
-}
-
-.filter-section {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 2rem;
-    border: 1px solid var(--border);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-}
-
-.filter-section:hover {
-    transform: translateY(-5px);
-    border-color: var(--primary-light);
-    box-shadow: var(--shadow-xl);
-}
-
-.filter-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
-    color: var(--text-primary);
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-feature-settings: 'ss02' on;
-}
-
-.dropdown {
+/* Recipe Board Container */
+.recipe-board-container {
     width: 100%;
-    height: 55px;
-    background: var(--surface);
-    border: 2px solid var(--border);
-    border-radius: 14px;
-    font-weight: 500;
-    color: var(--text-primary);
-    padding: 0 1.5rem;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 1.5rem center;
-    background-size: 1.2em;
+    margin: 2rem 0;
 }
 
-.dropdown:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+.loading-message {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
 }
 
-/* Search Section */
+/* Enhanced Filters Styles */
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
 .search-section {
     display: flex;
     gap: 1rem;
     margin: 2rem auto;
-    max-width: 600px;
+    max-width: 800px;
     background: var(--surface);
     padding: 1.5rem;
     border-radius: 20px;
     border: 1px solid var(--border);
     box-shadow: var(--shadow-lg);
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .search-input {
     flex: 1;
+    min-width: 200px;
     padding: 1rem 1.5rem;
     border: 2px solid var(--border);
     border-radius: 14px;
@@ -382,15 +316,152 @@ header .container {
     border-radius: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-feature-settings: 'ss02' on;
+    white-space: nowrap;
 }
 
 .search-btn:hover {
-    transform: translateY(-2px) scale(1.02);
-    box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.clear-filters-btn {
+    padding: 1rem 1.5rem;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.clear-filters-btn:hover {
+    background: var(--surface-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-section {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 2rem;
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-md);
+}
+
+.filter-section:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary-light);
+    box-shadow: var(--shadow-xl);
+}
+
+.filter-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Dropdown Styles */
+.dropdown {
+    width: 100%;
+    height: 55px;
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    padding: 0 1.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1.5rem center;
+    background-size: 1.2em;
+}
+
+.dropdown:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Active filter state */
+.dropdown:not([value=""]):not([value="Все кухни"]):not([value="Любое время"]):not([value="Любая сложность"]):not([value="Все типы"]):not([value="Любой рейтинг"]):not([value="Все теги"]) {
+    border-color: var(--primary);
+    background: linear-gradient(135deg, var(--surface), var(--surface-light));
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+/* Active Filters */
+.active-filters {
+    background: var(--surface-light);
+    padding: 1.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+    display: none;
+}
+
+.active-filters-title {
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.active-filters-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--gradient-primary);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.filter-chip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.remove-filter {
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.remove-filter:hover {
+    opacity: 1;
+}
+
+/* Results Counter */
+.results-counter {
+    text-align: center;
+    margin: 1rem 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
 /* Popular Section */
@@ -468,7 +539,6 @@ header .container {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     z-index: 2;
-    font-feature-settings: 'ss02' on;
 }
 
 .card-badge.trending {
@@ -484,7 +554,6 @@ header .container {
     font-weight: 700;
     margin-bottom: 1rem;
     color: var(--text-primary);
-    font-feature-settings: 'ss02' on;
 }
 
 .card-meta {
@@ -501,7 +570,6 @@ header .container {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-feature-settings: 'ss02' on;
 }
 
 .card-description {
@@ -509,7 +577,6 @@ header .container {
     font-size: 0.95rem;
     line-height: 1.7;
     margin-bottom: 2rem;
-    font-feature-settings: 'ss02' on;
 }
 
 .card-tags {
@@ -530,7 +597,6 @@ header .container {
     letter-spacing: 0.3px;
     transition: all 0.3s ease;
     border: 1px solid var(--border-light);
-    font-feature-settings: 'ss02' on;
 }
 
 .tag:hover {
@@ -556,7 +622,6 @@ header .container {
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-feature-settings: 'ss02' on;
 }
 
 .change {
@@ -586,7 +651,7 @@ header .container {
     display: block;
     width: 100%;
     max-width: 320px;
-    margin: 0 auto;
+    margin: 2rem auto;
     background: var(--gradient-primary);
     color: white;
     border: none;
@@ -601,7 +666,6 @@ header .container {
     letter-spacing: 1px;
     position: relative;
     overflow: hidden;
-    font-feature-settings: 'ss02' on;
 }
 
 .more-link::before {
@@ -622,6 +686,35 @@ header .container {
 .more-link:hover {
     transform: translateY(-3px) scale(1.02);
     box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: var(--surface);
+    border-radius: 20px;
+    border: 2px dashed var(--border);
+    margin: 2rem 0;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1.5;
 }
 
 /* Features Section */
@@ -675,14 +768,12 @@ header .container {
     font-weight: 700;
     margin-bottom: 1rem;
     color: var(--text-primary);
-    font-feature-settings: 'ss02' on;
 }
 
 .feature-card p {
     color: var(--text-secondary);
     line-height: 1.6;
     font-size: 0.95rem;
-    font-feature-settings: 'ss02' on;
 }
 
 /* Subscription Section */
@@ -723,7 +814,6 @@ header .container {
     -webkit-text-fill-color: transparent;
     background-clip: text;
     position: relative;
-    font-feature-settings: 'ss02' on;
 }
 
 .subscription p {
@@ -731,7 +821,6 @@ header .container {
     margin-bottom: 2.5rem;
     font-size: 1.1rem;
     position: relative;
-    font-feature-settings: 'ss02' on;
 }
 
 #subscribe-form {
@@ -775,7 +864,6 @@ header .container {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    font-feature-settings: 'ss02' on;
 }
 
 .subscribe-btn:hover {
@@ -804,7 +892,6 @@ footer {
     font-weight: 700;
     margin-bottom: 1.5rem;
     color: var(--text-primary);
-    font-feature-settings: 'ss02' on;
 }
 
 .footer-section a {
@@ -814,7 +901,6 @@ footer {
     margin-bottom: 0.8rem;
     transition: all 0.3s ease;
     padding: 0.5rem 0;
-    font-feature-settings: 'ss02' on;
 }
 
 .footer-section a:hover {
@@ -840,7 +926,6 @@ footer {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border: 1px solid var(--border);
-    font-feature-settings: 'ss02' on;
 }
 
 .social-link:hover {
@@ -857,7 +942,115 @@ footer {
     font-size: 0.9rem;
     padding-top: 2rem;
     border-top: 1px solid var(--border-light);
-    font-feature-settings: 'ss02' on;
+}
+
+/* Edit Modal */
+.edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.edit-form {
+    background: var(--surface);
+    padding: 2.5rem;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-xl);
+}
+
+.edit-form h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.edit-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.edit-form input,
+.edit-form textarea,
+.edit-form select {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+}
+
+.edit-form input:focus,
+.edit-form textarea:focus,
+.edit-form select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.edit-form textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.edit-button-group {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.cancel-btn {
+    padding: 1rem 2rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+    background: var(--surface-light);
+    border-color: var(--text-muted);
+}
+
+.save-btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--gradient-primary);
+    color: white;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.save-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
 }
 
 /* Responsive Design */
@@ -886,7 +1079,7 @@ footer {
         grid-template-columns: 1fr;
     }
     
-    .filters {
+    .filters-grid {
         grid-template-columns: 1fr;
     }
     
@@ -919,6 +1112,28 @@ footer {
         font-size: 1.4rem;
         margin-left: 0.5rem;
     }
+
+    .edit-button-group {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .filters-grid {
+        gap: 1rem;
+    }
+    
+    .search-section {
+        padding: 1rem;
+    }
+    
+    .filter-section {
+        padding: 1rem;
+    }
+    
+    .popular-card {
+        margin: 0 1rem;
+    }
 }
 
 /* Custom Scrollbar */
@@ -943,4 +1158,180 @@ footer {
 ::selection {
     background: rgba(99, 102, 241, 0.2);
     color: var(--text-primary);
+
+}
+
+/* Add Recipe Button Styles */
+.add-recipe-btn {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: 2rem auto;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1.3rem 2.5rem;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+.add-recipe-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.add-recipe-btn:hover::before {
+    left: 100%;
+}
+
+.add-recipe-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+}
+
+/* Required field indicators */
+.edit-form input:required,
+.edit-form select:required {
+    border-left: 4px solid var(--primary);
+}
+
+.edit-form input:invalid,
+.edit-form select:invalid {
+    border-color: var(--error);
+}
+
+/* Form validation styles */
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+}
+
+.required-field::after {
+    content: ' *';
+    color: var(--error);
+}
+/* Add Recipe Button Styles */
+.add-recipe-section {
+    text-align: center;
+    margin: 3rem 0;
+    padding: 2rem 0;
+}
+
+.add-recipe-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    padding: 1.5rem 3rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+}
+
+.add-recipe-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s ease;
+}
+
+.add-recipe-btn:hover::before {
+    left: 100%;
+}
+
+.add-recipe-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4);
+}
+
+.add-recipe-icon {
+    font-size: 1.5rem;
+    font-weight: 800;
+    transition: transform 0.3s ease;
+}
+
+.add-recipe-btn:hover .add-recipe-icon {
+    transform: rotate(90deg) scale(1.2);
+}
+
+/* Required field indicators */
+.edit-form input:required,
+.edit-form select:required {
+    border-left: 4px solid var(--primary);
+}
+
+.edit-form input:invalid:not(:focus),
+.edit-form select:invalid:not(:focus) {
+    border-color: var(--error);
+}
+
+/* Form validation styles */
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+.required-field::after {
+    content: ' *';
+    color: var(--error);
+}
+
+/* Loading state for add button */
+.add-recipe-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.add-recipe-btn:disabled:hover {
+    transform: none !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+@media (max-width: 768px) {
+    .add-recipe-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+        padding: 1.2rem 2rem;
+        font-size: 1.1rem;
+    }
+    
+    .add-recipe-section {
+        margin: 2rem 0;
+        padding: 1rem 0;
+    }
 }
