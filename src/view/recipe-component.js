@@ -1,4 +1,4 @@
-import { AbstractComponent } from './abstract-component.js';
+import { AbstractComponent } from '../framework/view/abstract-component.js';
 
 function createRecipeComponentTemplate(recipe) {
   const { id, title, time, difficulty, rating, description, tags, badge } = recipe;
@@ -6,7 +6,8 @@ function createRecipeComponentTemplate(recipe) {
   const badgeClass = badge === 'Тренд' ? 'trending' : '';
   
   return `
-    <div class="popular-card" data-recipe-id="${id}">
+    <div class="popular-card draggable-recipe" data-recipe-id="${id}" draggable="true">
+      <div class="drag-handle">⋮⋮</div>
       ${badge ? `<div class="card-badge ${badgeClass}">${badge}</div>` : ''}
       <div class="card-content">
         <h3 class="card-title">${title}</h3>
