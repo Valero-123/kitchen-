@@ -1,62 +1,133 @@
-import { mockRecipes } from '../mock/recipe.js';
+import RecipesApiService from './recipes-api-service.js';
 
 export default class RecipeModel {
-  #recipes = [...mockRecipes];
+  #recipes = [];
   #observers = [];
+  #recipesApiService = null;
+  #isInitialized = false;
+
+  constructor(recipesApiService) {
+    this.#recipesApiService = recipesApiService;
+  }
 
   get recipes() {
     return this.#recipes;
   }
 
-  addRecipe(recipeData) {
-    const newRecipe = {
-      id: this.#generateId(),
-      title: recipeData.title,
-      time: recipeData.time,
-      difficulty: recipeData.difficulty,
-      rating: "4.5",
-      description: recipeData.description,
-      tags: recipeData.tags,
-      badge: "Новый",
-      cuisine: recipeData.cuisine,
-      cookingTime: recipeData.cookingTime,
-      difficultyLevel: recipeData.difficultyLevel,
-      category: recipeData.category || "Основные"
-    };
-    
-    this.#recipes.push(newRecipe);
-    this._notify();
-    console.log('✅ Recipe added:', newRecipe.title);
+  get isInitialized() {
+    return this.#isInitialized;
   }
 
-  updateRecipe(id, updatedData) {
-    const index = this.#recipes.findIndex(recipe => recipe.id === id);
-    if (index !== -1) {
-      this.#recipes[index] = { ...this.#recipes[index], ...updatedData };
-      this._notify();
-      console.log('✅ Recipe updated:', this.#recipes[index].title);
+  // Инициализация данных с сервера
+  async init() {
+    try {
+      console.log('🔄 Загрузка рецептов с сервера...');
+      this.#recipes = await this.#recipesApiService.recipes;
+      console.log('✅ Рецепты загружены:', this.#recipes.length);
+      this.#isInitialized = true;
+      this._notify('INIT');
+    } catch (err) {
+      console.error('❌ Ошибка загрузки рецептов:', err);
+      this.#recipes = [];
+      this.#isInitialized = true;
+      this._notify('ERROR');
     }
   }
 
-  deleteRecipe(id) {
-    const recipe = this.#recipes.find(r => r.id === id);
-    this.#recipes = this.#recipes.filter(recipe => recipe.id !== id);
-    this._notify();
-    console.log('🗑️ Recipe deleted:', recipe?.title);
+  // Добавить рецепт через API
+  async addRecipe(recipeData) {
+    try {
+      const newRecipe = {
+        title: recipeData.title,
+        time: recipeData.time,
+        difficulty: recipeData.difficulty,
+        rating: "4.5",
+        description: recipeData.description,
+        tags: recipeData.tags || [],
+        badge: "Новый",
+        cuisine: recipeData.cuisine,
+        cookingTime: recipeData.cookingTime,
+        difficultyLevel: recipeData.difficultyLevel,
+        category: recipeData.category || "Основные",
+        createdAt: new Date().toISOString()
+      };
+
+      console.log('🔄 Отправка рецепта на сервер:', newRecipe.title);
+      const createdRecipe = await this.#recipesApiService.addRecipe(newRecipe);
+      
+      this.#recipes.push(createdRecipe);
+      this._notify('ADD', createdRecipe);
+      console.log('✅ Рецепт добавлен на сервер:', createdRecipe.title);
+      
+      return createdRecipe;
+    } catch (err) {
+      console.error('❌ Ошибка при добавлении рецепта:', err);
+      throw err;
+    }
   }
 
-  // Drag & Drop: изменение порядка рецептов
+  // Обновить рецепт через API
+  async updateRecipe(id, updatedData) {
+    try {
+      const index = this.#recipes.findIndex(recipe => recipe.id === id);
+      if (index === -1) {
+        throw new Error(`Рецепт с id ${id} не найден`);
+      }
+
+      const updatedRecipe = { 
+        ...this.#recipes[index], 
+        ...updatedData,
+        updatedAt: new Date().toISOString()
+      };
+      
+      console.log('🔄 Обновление рецепта на сервере:', updatedRecipe.title);
+      const result = await this.#recipesApiService.updateRecipe(id, updatedRecipe);
+      
+      this.#recipes[index] = result;
+      this._notify('UPDATE', result);
+      console.log('✅ Рецепт обновлен на сервере:', result.title);
+      
+      return result;
+    } catch (err) {
+      console.error('❌ Ошибка при обновлении рецепта:', err);
+      throw err;
+    }
+  }
+
+  // Удалить рецепт через API
+  async deleteRecipe(id) {
+    try {
+      const recipe = this.#recipes.find(r => r.id === id);
+      if (!recipe) {
+        throw new Error(`Рецепт с id ${id} не найден`);
+      }
+
+      console.log('🔄 Удаление рецепта с сервера:', recipe.title);
+      await this.#recipesApiService.deleteRecipe(id);
+      
+      this.#recipes = this.#recipes.filter(recipe => recipe.id !== id);
+      this._notify('DELETE', { id });
+      console.log('✅ Рецепт удален с сервера:', recipe.title);
+      
+      return recipe;
+    } catch (err) {
+      console.error('❌ Ошибка при удалении рецепта:', err);
+      throw err;
+    }
+  }
+
+  // Drag & Drop (только локально)
   reorderRecipes(sourceIndex, targetIndex) {
     if (sourceIndex === targetIndex) return;
     
     const [movedRecipe] = this.#recipes.splice(sourceIndex, 1);
     this.#recipes.splice(targetIndex, 0, movedRecipe);
-    this._notify();
-    console.log('🔀 Recipes reordered:', { sourceIndex, targetIndex, recipe: movedRecipe.title });
+    this._notify('REORDER');
+    console.log('🔀 Рецепты переупорядочены локально');
   }
 
+  // Фильтрация
   filterRecipes(filters = {}) {
-    console.log('🔍 Starting filtration with filters:', filters);
     let filteredRecipes = [...this.#recipes];
 
     // Filter by cuisine
@@ -64,9 +135,7 @@ export default class RecipeModel {
       filteredRecipes = filteredRecipes.filter(recipe => {
         const recipeCuisine = this.#extractCuisineName(recipe.cuisine);
         const filterCuisine = this.#extractCuisineName(filters.cuisine);
-        const matches = recipeCuisine === filterCuisine;
-        console.log(`🍳 ${recipe.title} - кухня: ${recipeCuisine}, фильтр: ${filterCuisine}, совпадение: ${matches}`);
-        return matches;
+        return recipeCuisine === filterCuisine;
       });
     }
 
@@ -74,11 +143,9 @@ export default class RecipeModel {
     if (filters.search && filters.search.trim() !== '') {
       const searchTerm = filters.search.toLowerCase().trim();
       filteredRecipes = filteredRecipes.filter(recipe => {
-        const matches = recipe.title.toLowerCase().includes(searchTerm) ||
-                       recipe.description.toLowerCase().includes(searchTerm) ||
-                       recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm));
-        console.log(`🔍 ${recipe.title} - поиск: "${searchTerm}", совпадение: ${matches}`);
-        return matches;
+        return recipe.title.toLowerCase().includes(searchTerm) ||
+               recipe.description.toLowerCase().includes(searchTerm) ||
+               (recipe.tags && recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
       });
     }
 
@@ -86,46 +153,34 @@ export default class RecipeModel {
     if (filters.time && filters.time !== '') {
       filteredRecipes = filteredRecipes.filter(recipe => {
         const timeMinutes = this.#extractTimeMinutes(recipe.time);
-        let matches = false;
         
         switch (filters.time) {
           case 'fast':
-            matches = timeMinutes <= 20;
-            break;
+            return timeMinutes <= 20;
           case 'short':
-            matches = timeMinutes <= 30;
-            break;
+            return timeMinutes <= 30;
           case 'medium':
-            matches = timeMinutes <= 60;
-            break;
+            return timeMinutes <= 60;
           case 'long':
-            matches = timeMinutes > 60;
-            break;
+            return timeMinutes > 60;
           default:
-            matches = true;
+            return true;
         }
-        
-        console.log(`⏱️ ${recipe.title} - время: ${recipe.time} (${timeMinutes} мин), фильтр: ${filters.time}, совпадение: ${matches}`);
-        return matches;
       });
     }
 
     // Filter by difficulty
     if (filters.difficulty && filters.difficulty !== '') {
       filteredRecipes = filteredRecipes.filter(recipe => {
-        const matches = recipe.difficultyLevel === filters.difficulty;
-        console.log(`📊 ${recipe.title} - сложность: ${recipe.difficultyLevel}, фильтр: ${filters.difficulty}, совпадение: ${matches}`);
-        return matches;
+        return recipe.difficultyLevel === filters.difficulty;
       });
     }
 
     // Filter by category
     if (filters.category && filters.category !== '') {
       filteredRecipes = filteredRecipes.filter(recipe => {
-        const matches = recipe.category === filters.category || 
-                       recipe.tags.includes(filters.category);
-        console.log(`🍽️ ${recipe.title} - категория: ${recipe.category}, теги: ${recipe.tags}, фильтр: ${filters.category}, совпадение: ${matches}`);
-        return matches;
+        return recipe.category === filters.category || 
+               (recipe.tags && recipe.tags.includes(filters.category));
       });
     }
 
@@ -133,27 +188,23 @@ export default class RecipeModel {
     if (filters.rating && filters.rating !== '') {
       const minRating = parseFloat(filters.rating);
       filteredRecipes = filteredRecipes.filter(recipe => {
-        const recipeRating = parseFloat(recipe.rating);
-        const matches = recipeRating >= minRating;
-        console.log(`⭐ ${recipe.title} - рейтинг: ${recipe.rating}, фильтр: ${minRating}+, совпадение: ${matches}`);
-        return matches;
+        const recipeRating = parseFloat(recipe.rating) || 0;
+        return recipeRating >= minRating;
       });
     }
 
     // Filter by tags
     if (filters.tags && filters.tags !== '') {
       filteredRecipes = filteredRecipes.filter(recipe => {
-        const matches = recipe.tags.some(tag => tag === filters.tags);
-        console.log(`🏷️ ${recipe.title} - теги: ${recipe.tags}, фильтр: ${filters.tags}, совпадение: ${matches}`);
-        return matches;
+        return recipe.tags && recipe.tags.some(tag => tag === filters.tags);
       });
     }
 
-    console.log('🔍 Filtration completed. Results:', filteredRecipes.length);
     return filteredRecipes;
   }
 
   #extractCuisineName(cuisineString) {
+    if (!cuisineString) return '';
     return cuisineString.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇹🇭🇺🇸🇪🇸🇭🇺🇮🇱🇱🇧🇰🇷🇨🇺🇬🇷🇮🇳🇻🇳]/g, '').trim();
   }
 
@@ -181,16 +232,12 @@ export default class RecipeModel {
     console.log('👋 Observer removed from RecipeModel');
   }
 
-  _notify() {
-    console.log('🔔 Notifying observers, total:', this.#observers.length);
+  _notify(event, payload) {
+    console.log(`🔔 Notifying observers: ${event}`, payload);
     this.#observers.forEach(observer => {
       if (typeof observer === 'function') {
-        observer();
+        observer(event, payload);
       }
     });
-  }
-
-  #generateId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
   }
 }

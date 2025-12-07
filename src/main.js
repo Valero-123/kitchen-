@@ -1,5 +1,6 @@
 import HeaderComponent from './view/header-component.js';
 import RecipeModel from './model/recipe-model.js';
+import RecipesApiService from './model/recipes-api-service.js';
 import RecipesBoardPresenter from './presenter/recipes-board-presenter.js';
 import { render, RenderPosition } from './framework/render.js';
 
@@ -11,7 +12,11 @@ class App {
   #boardPresenter = null;
 
   constructor() {
-    this.#recipeModel = new RecipeModel();
+    // URL вашего mockAPI
+    const API_URL = 'https://69316ffb11a8738467cecc9a.mockapi.io/recipes';
+    const recipesApiService = new RecipesApiService(API_URL);
+    
+    this.#recipeModel = new RecipeModel(recipesApiService);
     this.#headerComponent = new HeaderComponent();
   }
 
