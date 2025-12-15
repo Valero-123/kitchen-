@@ -2,6 +2,7 @@ import FormAddRecipeComponent from '../view/form-add-recipe-component.js';
 import RecipeListComponent from '../view/recipe-list-component.js';
 import RecipeComponent from '../view/recipe-component.js';
 import EmptyComponent from '../view/empty-component.js';
+import LoadingComponent from '../view/loading-component.js';
 import { render } from '../framework/render.js';
 
 export default class RecipesBoardPresenter {
@@ -9,21 +10,51 @@ export default class RecipesBoardPresenter {
   #boardContainer = null;
   #formAddRecipeComponent = null;
   #recipeListComponent = null;
-  #currentFilters = {};
+  #loadingComponent = null;
+  #currentSearch = '';
   #dragSourceIndex = null;
+  #isLoading = false;
 
   constructor(recipeModel, boardContainer) {
     this.#recipeModel = recipeModel;
     this.#boardContainer = boardContainer;
     this.#formAddRecipeComponent = new FormAddRecipeComponent();
     this.#recipeListComponent = new RecipeListComponent();
+    this.#loadingComponent = new LoadingComponent();
     this.#recipeModel.addObserver(this.#handleModelChange.bind(this));
   }
 
-  init() {
+  async init() {
     console.log('🔍 Starting board presenter initialization...');
+    
+    // Показываем индикатор загрузки
+    this.#showLoading();
+    
+    // Загружаем данные с сервера
+    try {
+      await this.#recipeModel.init();
+    } catch (error) {
+      console.error('❌ Failed to initialize recipe model:', error);
+      alert('Не удалось загрузить рецепты с сервера. Проверьте подключение к интернету.');
+    }
+    
+    // Скрываем индикатор и рендерим
+    this.#hideLoading();
     this.#renderBoard();
     console.log('✅ Board presenter initialized successfully');
+  }
+
+  #showLoading() {
+    this.#isLoading = true;
+    this.#boardContainer.innerHTML = '';
+    render(this.#loadingComponent, this.#boardContainer);
+  }
+
+  #hideLoading() {
+    this.#isLoading = false;
+    if (this.#loadingComponent.getElement()) {
+      this.#loadingComponent.removeElement();
+    }
   }
 
   #renderBoard() {
@@ -44,6 +75,8 @@ export default class RecipesBoardPresenter {
   }
 
   #renderRecipes() {
+    if (this.#isLoading) return;
+
     const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
     
     if (!recipesContainer) {
@@ -54,14 +87,10 @@ export default class RecipesBoardPresenter {
     // Очищаем контейнер
     recipesContainer.innerHTML = '';
 
-    // Получаем отфильтрованные рецепты
-    const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentFilters);
+    // Получаем отфильтрованные рецепты (только по поиску)
+    const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentSearch);
 
     console.log(`🔍 Found ${filteredRecipes.length} recipes`);
-
-    // Обновляем UI
-    this.#updateActiveFiltersDisplay();
-    this.#updateResultsCounter(filteredRecipes.length);
 
     // Если рецептов нет - показываем пустое состояние
     if (filteredRecipes.length === 0) {
@@ -154,13 +183,12 @@ export default class RecipesBoardPresenter {
     const searchInput = this.#boardContainer.querySelector('.search-input');
     const searchBtn = this.#boardContainer.querySelector('.search-btn');
     const addRecipeMainBtn = this.#boardContainer.querySelector('.add-recipe-main-btn');
-    const clearFiltersBtn = this.#boardContainer.querySelector('.clear-all-filters-btn');
 
     // Поиск
     if (searchInput && searchBtn) {
       const performSearch = () => {
-        this.#currentFilters.search = searchInput.value.trim();
-        console.log('🔍 Performing search:', this.#currentFilters.search);
+        this.#currentSearch = searchInput.value.trim();
+        console.log('🔍 Performing search:', this.#currentSearch);
         this.#renderRecipes();
       };
 
@@ -173,7 +201,7 @@ export default class RecipesBoardPresenter {
 
       searchInput.addEventListener('input', () => {
         if (searchInput.value.trim() === '') {
-          delete this.#currentFilters.search;
+          this.#currentSearch = '';
           this.#renderRecipes();
         }
       });
@@ -192,36 +220,6 @@ export default class RecipesBoardPresenter {
       console.error('❌ Add recipe main button not found!');
     }
 
-    // Кнопка очистки фильтров
-    if (clearFiltersBtn) {
-      clearFiltersBtn.addEventListener('click', () => {
-        console.log('🗑️ Clearing all filters');
-        this.#clearAllFilters();
-      });
-      console.log('✅ Clear filters button listener added');
-    }
-
-    // Фильтры (все 6 фильтров)
-    const filters = [
-      { id: 'cuisineFilter', key: 'cuisine' },
-      { id: 'timeFilter', key: 'time' },
-      { id: 'difficultyFilter', key: 'difficulty' },
-      { id: 'categoryFilter', key: 'category' },
-      { id: 'ratingFilter', key: 'rating' },
-      { id: 'tagsFilter', key: 'tags' }
-    ];
-
-    filters.forEach(({ id, key }) => {
-      const filter = this.#boardContainer.querySelector(`#${id}`);
-      if (filter) {
-        filter.addEventListener('change', () => {
-          this.#currentFilters[key] = filter.value;
-          console.log(`🔍 Filter changed: ${key} = ${filter.value}`);
-          this.#renderRecipes();
-        });
-      }
-    });
-
     console.log('✅ All event listeners set up');
   }
 
@@ -230,7 +228,10 @@ export default class RecipesBoardPresenter {
       button.addEventListener('click', (event) => {
         const recipeCard = event.target.closest('.popular-card');
         if (recipeCard) {
-          this.#handleEditRecipe(recipeCard.dataset.recipeId);
+          const recipeId = recipeCard.dataset.recipeId;
+          if (recipeId) {
+            this.#handleEditRecipe(recipeId);
+          }
         }
       });
     });
@@ -239,7 +240,10 @@ export default class RecipesBoardPresenter {
       button.addEventListener('click', (event) => {
         const recipeCard = event.target.closest('.popular-card');
         if (recipeCard) {
-          this.#handleDeleteRecipe(recipeCard.dataset.recipeId);
+          const recipeId = recipeCard.dataset.recipeId;
+          if (recipeId) {
+            this.#handleDeleteRecipe(recipeId);
+          }
         }
       });
     });
@@ -346,7 +350,7 @@ export default class RecipesBoardPresenter {
 
     cancelBtn.addEventListener('click', closeModal);
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       const title = form.querySelector('#addTitle').value.trim();
       const description = form.querySelector('#addDescription').value.trim();
       const time = form.querySelector('#addTime').value.trim();
@@ -406,10 +410,23 @@ export default class RecipesBoardPresenter {
         difficultyLevel,
         category
       };
-      
-      this.#recipeModel.addRecipe(newRecipe);
-      closeModal();
-      alert(`Рецепт "${title}" успешно добавлен!`);
+
+      try {
+        // Показываем индикатор загрузки при добавлении
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Добавляем...';
+        
+        await this.#recipeModel.addRecipe(newRecipe);
+        
+        alert(`Рецепт "${title}" успешно добавлен!`);
+        closeModal();
+      } catch (error) {
+        console.error('❌ Error adding recipe:', error);
+        alert('Ошибка при добавлении рецепта. Пожалуйста, попробуйте снова.');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Добавить рецепт';
+      }
     });
 
     modal.addEventListener('click', (event) => {
@@ -446,42 +463,42 @@ export default class RecipesBoardPresenter {
       
       <div>
         <label class="required-field">Название рецепта</label>
-        <input type="text" id="editTitle" value="${recipe.title}" required>
+        <input type="text" id="editTitle" value="${recipe.title || ''}" required>
       </div>
 
       <div>
         <label>Описание</label>
-        <textarea id="editDescription">${recipe.description}</textarea>
+        <textarea id="editDescription">${recipe.description || ''}</textarea>
       </div>
 
       <div>
         <label class="required-field">Время приготовления</label>
-        <input type="text" id="editTime" value="${recipe.time}" required>
+        <input type="text" id="editTime" value="${recipe.time || ''}" required>
         <div class="form-hint">Примеры: 15 мин, 30 мин, 1 ч, 1 ч 30 мин</div>
       </div>
 
       <div>
         <label class="required-field">Сложность</label>
         <select id="editDifficulty" required>
-          <option value="👶 Начинающий" ${recipe.difficulty.includes('Начинающий') ? 'selected' : ''}>👶 Начинающий</option>
-          <option value="👨‍🍳 Любитель" ${recipe.difficulty.includes('Любитель') ? 'selected' : ''}>👨‍🍳 Любитель</option>
-          <option value="🧑‍🍳 Профессионал" ${recipe.difficulty.includes('Профессионал') ? 'selected' : ''}>🧑‍🍳 Профессионал</option>
+          <option value="👶 Начинающий" ${recipe.difficulty && recipe.difficulty.includes('Начинающий') ? 'selected' : ''}>👶 Начинающий</option>
+          <option value="👨‍🍳 Любитель" ${recipe.difficulty && recipe.difficulty.includes('Любитель') ? 'selected' : ''}>👨‍🍳 Любитель</option>
+          <option value="🧑‍🍳 Профессионал" ${recipe.difficulty && recipe.difficulty.includes('Профессионал') ? 'selected' : ''}>🧑‍🍳 Профессионал</option>
         </select>
       </div>
 
       <div>
         <label class="required-field">Кухня</label>
         <select id="editCuisine" required>
-          <option value="🇷🇺 Русская" ${recipe.cuisine.includes('Русская') ? 'selected' : ''}>🇷🇺 Русская</option>
-          <option value="🇮🇹 Итальянская" ${recipe.cuisine.includes('Итальянская') ? 'selected' : ''}>🇮🇹 Итальянская</option>
-          <option value="🇫🇷 Французская" ${recipe.cuisine.includes('Французская') ? 'selected' : ''}>🇫🇷 Французская</option>
-          <option value="🇨🇳 Китайская" ${recipe.cuisine.includes('Китайская') ? 'selected' : ''}>🇨🇳 Китайская</option>
-          <option value="🇯🇵 Японская" ${recipe.cuisine.includes('Японская') ? 'selected' : ''}>🇯🇵 Японская</option>
-          <option value="🇲🇽 Мексиканская" ${recipe.cuisine.includes('Мексиканская') ? 'selected' : ''}>🇲🇽 Мексиканская</option>
-          <option value="🇬🇷 Греческая" ${recipe.cuisine.includes('Греческая') ? 'selected' : ''}>🇬🇷 Греческая</option>
-          <option value="🇮🇳 Индийская" ${recipe.cuisine.includes('Индийская') ? 'selected' : ''}>🇮🇳 Индийская</option>
-          <option value="🇻🇳 Вьетнамская" ${recipe.cuisine.includes('Вьетнамская') ? 'selected' : ''}>🇻🇳 Вьетнамская</option>
-          <option value="🇪🇸 Испанская" ${recipe.cuisine.includes('Испанская') ? 'selected' : ''}>🇪🇸 Испанская</option>
+          <option value="🇷🇺 Русская" ${recipe.cuisine && recipe.cuisine.includes('Русская') ? 'selected' : ''}>🇷🇺 Русская</option>
+          <option value="🇮🇹 Итальянская" ${recipe.cuisine && recipe.cuisine.includes('Итальянская') ? 'selected' : ''}>🇮🇹 Итальянская</option>
+          <option value="🇫🇷 Французская" ${recipe.cuisine && recipe.cuisine.includes('Французская') ? 'selected' : ''}>🇫🇷 Французская</option>
+          <option value="🇨🇳 Китайская" ${recipe.cuisine && recipe.cuisine.includes('Китайская') ? 'selected' : ''}>🇨🇳 Китайская</option>
+          <option value="🇯🇵 Японская" ${recipe.cuisine && recipe.cuisine.includes('Японская') ? 'selected' : ''}>🇯🇵 Японская</option>
+          <option value="🇲🇽 Мексиканская" ${recipe.cuisine && recipe.cuisine.includes('Мексиканская') ? 'selected' : ''}>🇲🇽 Мексиканская</option>
+          <option value="🇬🇷 Греческая" ${recipe.cuisine && recipe.cuisine.includes('Греческая') ? 'selected' : ''}>🇬🇷 Греческая</option>
+          <option value="🇮🇳 Индийская" ${recipe.cuisine && recipe.cuisine.includes('Индийская') ? 'selected' : ''}>🇮🇳 Индийская</option>
+          <option value="🇻🇳 Вьетнамская" ${recipe.cuisine && recipe.cuisine.includes('Вьетнамская') ? 'selected' : ''}>🇻🇳 Вьетнамская</option>
+          <option value="🇪🇸 Испанская" ${recipe.cuisine && recipe.cuisine.includes('Испанская') ? 'selected' : ''}>🇪🇸 Испанская</option>
         </select>
       </div>
 
@@ -501,7 +518,7 @@ export default class RecipesBoardPresenter {
 
       <div>
         <label>Теги (через запятую)</label>
-        <input type="text" id="editTags" value="${recipe.tags.join(', ')}" placeholder="Например: Быстро, Вегетарианские, Здоровые">
+        <input type="text" id="editTags" value="${recipe.tags ? recipe.tags.join(', ') : ''}" placeholder="Например: Быстро, Вегетарианские, Здоровые">
         <div class="form-hint">Необязательное поле</div>
       </div>
 
@@ -520,7 +537,7 @@ export default class RecipesBoardPresenter {
 
     cancelBtn.addEventListener('click', closeModal);
 
-    saveBtn.addEventListener('click', () => {
+    saveBtn.addEventListener('click', async () => {
       const title = form.querySelector('#editTitle').value.trim();
       const description = form.querySelector('#editDescription').value.trim();
       const time = form.querySelector('#editTime').value.trim();
@@ -581,9 +598,22 @@ export default class RecipesBoardPresenter {
         difficultyLevel
       };
 
-      this.#recipeModel.updateRecipe(recipe.id, updatedData);
-      closeModal();
-      alert(`Рецепт "${title}" успешно обновлен!`);
+      try {
+        // Показываем индикатор загрузки при обновлении
+        saveBtn.disabled = true;
+        saveBtn.textContent = 'Сохраняем...';
+        
+        await this.#recipeModel.updateRecipe(recipe.id, updatedData);
+        
+        alert(`Рецепт "${title}" успешно обновлен!`);
+        closeModal();
+      } catch (error) {
+        console.error('❌ Error updating recipe:', error);
+        alert('Ошибка при обновлении рецепта. Пожалуйста, попробуйте снова.');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Сохранить изменения';
+      }
     });
 
     modal.addEventListener('click', (event) => {
@@ -625,147 +655,27 @@ export default class RecipesBoardPresenter {
   #handleDeleteRecipe(recipeId) {
     const recipe = this.#recipeModel.recipes.find(r => r.id === recipeId);
     if (recipe && confirm(`Удалить рецепт "${recipe.title}"?`)) {
-      this.#recipeModel.deleteRecipe(recipeId);
-      alert(`Рецепт "${recipe.title}" удален!`);
+      this.#recipeModel.deleteRecipe(recipeId)
+        .then(() => {
+          alert(`Рецепт "${recipe.title}" удален!`);
+        })
+        .catch(error => {
+          console.error('❌ Error deleting recipe:', error);
+          alert('Ошибка при удалении рецепта. Пожалуйста, попробуйте снова.');
+        });
     }
   }
 
-  #clearAllFilters() {
-    this.#currentFilters = {};
+  #handleModelChange(event, payload) {
+    console.log('🔄 Model changed:', event, payload);
     
-    const elements = {
-      '.search-input': (el) => el.value = '',
-      '#cuisineFilter': (el) => el.selectedIndex = 0,
-      '#timeFilter': (el) => el.selectedIndex = 0,
-      '#difficultyFilter': (el) => el.selectedIndex = 0,
-      '#categoryFilter': (el) => el.selectedIndex = 0,
-      '#ratingFilter': (el) => el.selectedIndex = 0,
-      '#tagsFilter': (el) => el.selectedIndex = 0
-    };
-
-    Object.entries(elements).forEach(([selector, resetFn]) => {
-      const element = this.#boardContainer.querySelector(selector);
-      if (element) resetFn(element);
-    });
-
-    this.#renderRecipes();
-  }
-
-  #updateActiveFiltersDisplay() {
-    const activeFiltersContainer = this.#boardContainer.querySelector('#activeFilters');
-    const activeFiltersList = this.#boardContainer.querySelector('#activeFiltersList');
-
-    if (!activeFiltersContainer || !activeFiltersList) return;
-
-    const activeFilters = Object.entries(this.#currentFilters)
-      .filter(([key, value]) => value && value !== '');
-
-    if (activeFilters.length === 0) {
-      activeFiltersContainer.style.display = 'none';
-      return;
-    }
-
-    activeFiltersContainer.style.display = 'block';
-    activeFiltersList.innerHTML = '';
-
-    activeFilters.forEach(([key, value]) => {
-      const filterChip = document.createElement('div');
-      filterChip.className = 'filter-chip';
-      
-      const filterName = this.#getFilterDisplayName(key, value);
-      filterChip.innerHTML = `
-        ${filterName}
-        <span class="remove-filter">×</span>
-      `;
-
-      filterChip.querySelector('.remove-filter').addEventListener('click', () => {
-        this.#removeFilter(key);
-      });
-
-      activeFiltersList.appendChild(filterChip);
-    });
-  }
-
-  #updateResultsCounter(resultsCount) {
-    let resultsCounter = this.#boardContainer.querySelector('.results-counter');
-    
-    if (!resultsCounter) {
-      resultsCounter = document.createElement('div');
-      resultsCounter.className = 'results-counter';
-      
-      const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
-      if (recipesContainer) {
-        recipesContainer.parentNode.insertBefore(resultsCounter, recipesContainer);
-      }
+    if (event === 'INIT' || event === 'ADD' || event === 'UPDATE' || event === 'DELETE' || event === 'REORDER') {
+      this.#renderRecipes();
     }
     
-    const totalRecipes = this.#recipeModel.recipes.length;
-    resultsCounter.textContent = resultsCount === totalRecipes 
-      ? `Все рецепты: ${resultsCount}`
-      : `Найдено: ${resultsCount} из ${totalRecipes}`;
-  }
-
-  #getFilterDisplayName(key, value) {
-    const displayNames = {
-      cuisine: `🌍 ${value.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇬🇷🇮🇳🇻🇳🇪🇸]/g, '').trim()}`,
-      time: `⏱️ ${this.#getTimeDisplayName(value)}`,
-      difficulty: `📊 ${this.#getDifficultyDisplayName(value)}`,
-      category: `🍽️ ${value}`,
-      rating: `⭐ ${value}+`,
-      tags: `🏷️ ${value}`,
-      search: `🔍 "${value}"`
-    };
-
-    return displayNames[key] || `${key}: ${value}`;
-  }
-
-  #getTimeDisplayName(timeKey) {
-    const timeNames = {
-      'fast': 'До 20 мин',
-      'short': 'До 30 мин',
-      'medium': 'До 1 часа',
-      'long': 'Более 1 часа'
-    };
-    return timeNames[timeKey] || timeKey;
-  }
-
-  #getDifficultyDisplayName(difficultyKey) {
-    const difficultyNames = {
-      'easy': 'Начинающий',
-      'medium': 'Любитель',
-      'hard': 'Профессионал'
-    };
-    return difficultyNames[difficultyKey] || difficultyKey;
-  }
-
-  #removeFilter(key) {
-    delete this.#currentFilters[key];
-    
-    const filterInputs = {
-      cuisine: '#cuisineFilter',
-      time: '#timeFilter',
-      difficulty: '#difficultyFilter',
-      category: '#categoryFilter',
-      rating: '#ratingFilter',
-      tags: '#tagsFilter',
-      search: '.search-input'
-    };
-
-    if (filterInputs[key]) {
-      const input = this.#boardContainer.querySelector(filterInputs[key]);
-      if (input) {
-        if (key === 'search') {
-          input.value = '';
-        } else {
-          input.selectedIndex = 0;
-        }
-      }
+    if (event === 'ERROR') {
+      this.#hideLoading();
+      alert('Ошибка загрузки данных с сервера. Пожалуйста, обновите страницу.');
     }
-
-    this.#renderRecipes();
-  }
-
-  #handleModelChange() {
-    this.#renderRecipes();
   }
 }
