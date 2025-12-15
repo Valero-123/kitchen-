@@ -1,5 +1,5 @@
 export const mockRecipes = [
-  {
+ /* {
     id: "1",
     title: "Карбонара",
     time: "20 мин",
@@ -54,5 +54,5 @@ export const mockRecipes = [
     cookingTime: "long",
     difficultyLevel: "hard",
     category: "Основные"
-  }
+  }*/
 ];

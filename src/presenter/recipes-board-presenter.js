@@ -11,7 +11,7 @@ export default class RecipesBoardPresenter {
   #formAddRecipeComponent = null;
   #recipeListComponent = null;
   #loadingComponent = null;
-  #currentSearch = '';
+  #currentFilters = {};
   #dragSourceIndex = null;
   #isLoading = false;
 
@@ -87,8 +87,8 @@ export default class RecipesBoardPresenter {
     // Очищаем контейнер
     recipesContainer.innerHTML = '';
 
-    // Получаем отфильтрованные рецепты (только по поиску)
-    const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentSearch);
+    // Получаем отфильтрованные рецепты
+    const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentFilters);
 
     console.log(`🔍 Found ${filteredRecipes.length} recipes`);
 
@@ -187,8 +187,8 @@ export default class RecipesBoardPresenter {
     // Поиск
     if (searchInput && searchBtn) {
       const performSearch = () => {
-        this.#currentSearch = searchInput.value.trim();
-        console.log('🔍 Performing search:', this.#currentSearch);
+        this.#currentFilters.search = searchInput.value.trim();
+        console.log('🔍 Performing search:', this.#currentFilters.search);
         this.#renderRecipes();
       };
 
@@ -201,7 +201,7 @@ export default class RecipesBoardPresenter {
 
       searchInput.addEventListener('input', () => {
         if (searchInput.value.trim() === '') {
-          this.#currentSearch = '';
+          delete this.#currentFilters.search;
           this.#renderRecipes();
         }
       });

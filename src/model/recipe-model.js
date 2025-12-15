@@ -126,19 +126,21 @@ export default class RecipeModel {
     console.log('🔀 Рецепты переупорядочены локально');
   }
 
-  // Фильтрация только по поиску
-  filterRecipes(searchTerm = '') {
-    if (!searchTerm.trim()) {
-      return [...this.#recipes];
+  // Фильтрация - только поиск
+  filterRecipes(filters = {}) {
+    let filteredRecipes = [...this.#recipes];
+
+    // Filter by search text
+    if (filters.search && filters.search.trim() !== '') {
+      const searchTerm = filters.search.toLowerCase().trim();
+      filteredRecipes = filteredRecipes.filter(recipe => {
+        return recipe.title.toLowerCase().includes(searchTerm) ||
+               recipe.description.toLowerCase().includes(searchTerm) ||
+               (recipe.tags && recipe.tags.some(tag => tag.toLowerCase().includes(searchTerm)));
+      });
     }
 
-    const term = searchTerm.toLowerCase().trim();
-    
-    return this.#recipes.filter(recipe => {
-      return recipe.title.toLowerCase().includes(term) ||
-             recipe.description.toLowerCase().includes(term) ||
-             (recipe.tags && recipe.tags.some(tag => tag.toLowerCase().includes(term)));
-    });
+    return filteredRecipes;
   }
 
   addObserver(observer) {
