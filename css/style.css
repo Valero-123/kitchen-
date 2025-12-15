@@ -229,7 +229,6 @@ header .container {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: fadeInUp 0.8s ease;
 }
 
 .hero-subtitle {
@@ -237,24 +236,15 @@ header .container {
     font-weight: 400;
     color: var(--text-secondary);
     margin-bottom: 2rem;
-    animation: fadeInUp 0.8s ease 0.2s both;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
 }
 
 /* Recipe Board Container */
 .recipe-board-container {
     width: 100%;
     margin: 2rem 0;
+    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
 .loading-message {
@@ -323,6 +313,9 @@ header .container {
 /* Popular Section */
 .popular-section {
     margin: 4rem 0;
+    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
 .section-title {
@@ -351,9 +344,11 @@ header .container {
 
 .popular-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 2rem;
     margin-bottom: 3rem;
+    opacity: 1;
+    visibility: visible;
 }
 
 .popular-card {
@@ -364,16 +359,12 @@ header .container {
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid var(--border);
     position: relative;
-    opacity: 0;
-    transform: translateY(30px);
-    animation: cardAppear 0.6s ease forwards;
-}
-
-@keyframes cardAppear {
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    opacity: 1;
+    visibility: visible;
+    display: block;
+    transform: none;
+    height: auto;
+    min-height: 300px;
 }
 
 .popular-card:hover {
@@ -402,7 +393,7 @@ header .container {
 }
 
 .card-content {
-    padding: 2.5rem;
+    padding: 2rem;
 }
 
 .card-title {
@@ -469,15 +460,13 @@ header .container {
 
 .change, .delete {
     flex: 1;
-    padding: 1rem;
+    padding: 0.8rem;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
 }
 
 .change {
@@ -967,22 +956,9 @@ footer {
 #recipesContainer {
     min-height: 400px;
     position: relative;
-}
-
-/* Анимации для появления карточек */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.popular-card {
-    animation: slideIn 0.5s ease-out;
+    display: block;
+    visibility: visible;
+    opacity: 1;
 }
 
 /* Адаптивность */
@@ -1009,6 +985,7 @@ footer {
     
     .popular-grid {
         grid-template-columns: 1fr;
+        gap: 1.5rem;
     }
     
     .feature-card {
@@ -1044,6 +1021,14 @@ footer {
     .edit-button-group {
         flex-direction: column;
     }
+    
+    .popular-card {
+        margin: 0;
+    }
+    
+    .card-content {
+        padding: 1.5rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1078,5 +1063,29 @@ footer {
 ::selection {
     background: rgba(99, 102, 241, 0.2);
     color: var(--text-primary);
+}
 
+/* Обязательные поля в форме */
+.required-field::after {
+    content: ' *';
+    color: var(--error);
+}
+
+.form-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: -0.5rem;
+    margin-bottom: 1rem;
+    font-style: italic;
+}
+
+/* Защита от случайного скрытия элементов */
+.popular-section,
+#recipesContainer,
+.recipe-board-container,
+.popular-grid,
+.popular-card {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
