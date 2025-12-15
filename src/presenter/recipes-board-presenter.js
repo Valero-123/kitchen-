@@ -11,7 +11,7 @@ export default class RecipesBoardPresenter {
   #formAddRecipeComponent = null;
   #recipeListComponent = null;
   #loadingComponent = null;
-  #currentFilters = {};
+  #currentSearch = '';
   #dragSourceIndex = null;
   #isLoading = false;
 
@@ -27,33 +27,27 @@ export default class RecipesBoardPresenter {
   async init() {
     console.log('🔍 Starting board presenter initialization...');
     
-    // Показываем индикатор загрузки
-    this.#showLoading();
-    
-    // Загружаем данные с сервера
-    try {
-      await this.#recipeModel.init();
-    } catch (error) {
-      console.error('❌ Failed to initialize recipe model:', error);
-      alert('Не удалось загрузить рецепты с сервера. Проверьте подключение к интернету.');
-    }
-    
-    // Скрываем индикатор и рендерим
-    this.#hideLoading();
+    // Сразу рендерим компоненты (как в изначальном коде)
     this.#renderBoard();
+    
+    // Потом в фоне загружаем данные с сервера
+    this.#loadRecipesFromServer();
+    
     console.log('✅ Board presenter initialized successfully');
   }
 
-  #showLoading() {
-    this.#isLoading = true;
-    this.#boardContainer.innerHTML = '';
-    render(this.#loadingComponent, this.#boardContainer);
-  }
-
-  #hideLoading() {
-    this.#isLoading = false;
-    if (this.#loadingComponent.getElement()) {
-      this.#loadingComponent.removeElement();
+  async #loadRecipesFromServer() {
+    try {
+      console.log('🔄 Загрузка рецептов с сервера...');
+      await this.#recipeModel.init();
+      console.log('✅ Рецепты загружены с сервера');
+      
+      // Обновляем отображение после загрузки
+      this.#renderRecipes();
+    } catch (error) {
+      console.error('❌ Ошибка загрузки рецептов с сервера:', error);
+      // Если сервер недоступен, показываем то, что уже есть
+      this.#renderRecipes();
     }
   }
 
@@ -63,20 +57,20 @@ export default class RecipesBoardPresenter {
     // Очищаем контейнер
     this.#boardContainer.innerHTML = '';
     
-    // Рендерим компоненты
+    // Рендерим компоненты (поиск и список рецептов)
     render(this.#formAddRecipeComponent, this.#boardContainer);
     render(this.#recipeListComponent, this.#boardContainer);
     
     console.log('✅ Board components rendered');
     
-    // Рендерим рецепты и настраиваем обработчики
+    // Сразу рендерим рецепты (даже если они еще не загружены с сервера)
     this.#renderRecipes();
     this.#setupEventListeners();
   }
 
   #renderRecipes() {
-    if (this.#isLoading) return;
-
+    console.log('🔄 Rendering recipes...');
+    
     const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
     
     if (!recipesContainer) {
@@ -87,14 +81,10 @@ export default class RecipesBoardPresenter {
     // Очищаем контейнер
     recipesContainer.innerHTML = '';
 
-    // Получаем отфильтрованные рецепты
-    const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentFilters);
+    // Получаем рецепты (могут быть пустыми, если еще не загрузились)
+    const filteredRecipes = this.#recipeModel.filterRecipes(this.#currentSearch);
 
-    console.log(`🔍 Found ${filteredRecipes.length} recipes`);
-
-    // Обновляем UI
-    this.#updateActiveFiltersDisplay();
-    this.#updateResultsCounter(filteredRecipes.length);
+    console.log(`🔍 Found ${filteredRecipes.length} recipes to render`);
 
     // Если рецептов нет - показываем пустое состояние
     if (filteredRecipes.length === 0) {
@@ -105,7 +95,8 @@ export default class RecipesBoardPresenter {
     }
 
     // Рендерим рецепты
-    filteredRecipes.forEach(recipe => {
+    filteredRecipes.forEach((recipe, index) => {
+      console.log(`🎨 Rendering recipe ${index + 1}:`, recipe.title);
       const recipeComponent = new RecipeComponent(recipe);
       render(recipeComponent, recipesContainer);
     });
@@ -187,13 +178,12 @@ export default class RecipesBoardPresenter {
     const searchInput = this.#boardContainer.querySelector('.search-input');
     const searchBtn = this.#boardContainer.querySelector('.search-btn');
     const addRecipeMainBtn = this.#boardContainer.querySelector('.add-recipe-main-btn');
-    const clearFiltersBtn = this.#boardContainer.querySelector('.clear-all-filters-btn');
 
     // Поиск
     if (searchInput && searchBtn) {
       const performSearch = () => {
-        this.#currentFilters.search = searchInput.value.trim();
-        console.log('🔍 Performing search:', this.#currentFilters.search);
+        this.#currentSearch = searchInput.value.trim();
+        console.log('🔍 Performing search:', this.#currentSearch);
         this.#renderRecipes();
       };
 
@@ -206,7 +196,7 @@ export default class RecipesBoardPresenter {
 
       searchInput.addEventListener('input', () => {
         if (searchInput.value.trim() === '') {
-          delete this.#currentFilters.search;
+          this.#currentSearch = '';
           this.#renderRecipes();
         }
       });
@@ -224,36 +214,6 @@ export default class RecipesBoardPresenter {
     } else {
       console.error('❌ Add recipe main button not found!');
     }
-
-    // Кнопка очистки фильтров
-    if (clearFiltersBtn) {
-      clearFiltersBtn.addEventListener('click', () => {
-        console.log('🗑️ Clearing all filters');
-        this.#clearAllFilters();
-      });
-      console.log('✅ Clear filters button listener added');
-    }
-
-    // Фильтры (все 6 фильтров)
-    const filters = [
-      { id: 'cuisineFilter', key: 'cuisine' },
-      { id: 'timeFilter', key: 'time' },
-      { id: 'difficultyFilter', key: 'difficulty' },
-      { id: 'categoryFilter', key: 'category' },
-      { id: 'ratingFilter', key: 'rating' },
-      { id: 'tagsFilter', key: 'tags' }
-    ];
-
-    filters.forEach(({ id, key }) => {
-      const filter = this.#boardContainer.querySelector(`#${id}`);
-      if (filter) {
-        filter.addEventListener('change', () => {
-          this.#currentFilters[key] = filter.value;
-          console.log(`🔍 Filter changed: ${key} = ${filter.value}`);
-          this.#renderRecipes();
-        });
-      }
-    });
 
     console.log('✅ All event listeners set up');
   }
@@ -701,151 +661,12 @@ export default class RecipesBoardPresenter {
     }
   }
 
-  #clearAllFilters() {
-    this.#currentFilters = {};
-    
-    const elements = {
-      '.search-input': (el) => el.value = '',
-      '#cuisineFilter': (el) => el.selectedIndex = 0,
-      '#timeFilter': (el) => el.selectedIndex = 0,
-      '#difficultyFilter': (el) => el.selectedIndex = 0,
-      '#categoryFilter': (el) => el.selectedIndex = 0,
-      '#ratingFilter': (el) => el.selectedIndex = 0,
-      '#tagsFilter': (el) => el.selectedIndex = 0
-    };
-
-    Object.entries(elements).forEach(([selector, resetFn]) => {
-      const element = this.#boardContainer.querySelector(selector);
-      if (element) resetFn(element);
-    });
-
-    this.#renderRecipes();
-  }
-
-  #updateActiveFiltersDisplay() {
-    const activeFiltersContainer = this.#boardContainer.querySelector('#activeFilters');
-    const activeFiltersList = this.#boardContainer.querySelector('#activeFiltersList');
-
-    if (!activeFiltersContainer || !activeFiltersList) return;
-
-    const activeFilters = Object.entries(this.#currentFilters)
-      .filter(([key, value]) => value && value !== '');
-
-    if (activeFilters.length === 0) {
-      activeFiltersContainer.style.display = 'none';
-      return;
-    }
-
-    activeFiltersContainer.style.display = 'block';
-    activeFiltersList.innerHTML = '';
-
-    activeFilters.forEach(([key, value]) => {
-      const filterChip = document.createElement('div');
-      filterChip.className = 'filter-chip';
-      
-      const filterName = this.#getFilterDisplayName(key, value);
-      filterChip.innerHTML = `
-        ${filterName}
-        <span class="remove-filter">×</span>
-      `;
-
-      filterChip.querySelector('.remove-filter').addEventListener('click', () => {
-        this.#removeFilter(key);
-      });
-
-      activeFiltersList.appendChild(filterChip);
-    });
-  }
-
-  #updateResultsCounter(resultsCount) {
-    let resultsCounter = this.#boardContainer.querySelector('.results-counter');
-    
-    if (!resultsCounter) {
-      resultsCounter = document.createElement('div');
-      resultsCounter.className = 'results-counter';
-      
-      const recipesContainer = this.#boardContainer.querySelector('#recipesContainer');
-      if (recipesContainer) {
-        recipesContainer.parentNode.insertBefore(resultsCounter, recipesContainer);
-      }
-    }
-    
-    const totalRecipes = this.#recipeModel.recipes.length;
-    resultsCounter.textContent = resultsCount === totalRecipes 
-      ? `Все рецепты: ${resultsCount}`
-      : `Найдено: ${resultsCount} из ${totalRecipes}`;
-  }
-
-  #getFilterDisplayName(key, value) {
-    const displayNames = {
-      cuisine: `🌍 ${value.replace(/[🇷🇺🇮🇹🇫🇷🇨🇳🇯🇵🇲🇽🇬🇷🇮🇳🇻🇳🇪🇸]/g, '').trim()}`,
-      time: `⏱️ ${this.#getTimeDisplayName(value)}`,
-      difficulty: `📊 ${this.#getDifficultyDisplayName(value)}`,
-      category: `🍽️ ${value}`,
-      rating: `⭐ ${value}+`,
-      tags: `🏷️ ${value}`,
-      search: `🔍 "${value}"`
-    };
-
-    return displayNames[key] || `${key}: ${value}`;
-  }
-
-  #getTimeDisplayName(timeKey) {
-    const timeNames = {
-      'fast': 'До 20 мин',
-      'short': 'До 30 мин',
-      'medium': 'До 1 часа',
-      'long': 'Более 1 часа'
-    };
-    return timeNames[timeKey] || timeKey;
-  }
-
-  #getDifficultyDisplayName(difficultyKey) {
-    const difficultyNames = {
-      'easy': 'Начинающий',
-      'medium': 'Любитель',
-      'hard': 'Профессионал'
-    };
-    return difficultyNames[difficultyKey] || difficultyKey;
-  }
-
-  #removeFilter(key) {
-    delete this.#currentFilters[key];
-    
-    const filterInputs = {
-      cuisine: '#cuisineFilter',
-      time: '#timeFilter',
-      difficulty: '#difficultyFilter',
-      category: '#categoryFilter',
-      rating: '#ratingFilter',
-      tags: '#tagsFilter',
-      search: '.search-input'
-    };
-
-    if (filterInputs[key]) {
-      const input = this.#boardContainer.querySelector(filterInputs[key]);
-      if (input) {
-        if (key === 'search') {
-          input.value = '';
-        } else {
-          input.selectedIndex = 0;
-        }
-      }
-    }
-
-    this.#renderRecipes();
-  }
-
   #handleModelChange(event, payload) {
     console.log('🔄 Model changed:', event, payload);
     
+    // Обновляем отображение при изменениях в модели
     if (event === 'INIT' || event === 'ADD' || event === 'UPDATE' || event === 'DELETE' || event === 'REORDER') {
       this.#renderRecipes();
-    }
-    
-    if (event === 'ERROR') {
-      this.#hideLoading();
-      alert('Ошибка загрузки данных с сервера. Пожалуйста, обновите страницу.');
     }
   }
 }
